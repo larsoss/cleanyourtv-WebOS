@@ -33,7 +33,7 @@ De installatie loopt via één SSH-commando vanaf je Windows-pc. Het originele C
 3. Je zit nu op de tv (je ziet een `root@LGwebOSTV`-prompt). Plak dit commando:
 
    ```sh
-   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-couch/main/tools/install-couch.sh | sh
+   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-WebOS/couch/tools/install-couch.sh | sh
    ```
 
    Het script doet het volgende:
@@ -49,7 +49,7 @@ De installatie loopt via één SSH-commando vanaf je Windows-pc. Het originele C
 Je kunt stap 2 en 3 ook in één keer vanuit PowerShell doen:
 
 ```powershell
-ssh root@192.168.4.44 "curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-couch/main/tools/install-couch.sh | sh"
+ssh root@192.168.4.44 "curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-WebOS/couch/tools/install-couch.sh | sh"
 ```
 
 ## De Home Assistant-weerkaart instellen
@@ -68,7 +68,7 @@ ssh root@192.168.4.44 "curl -fsSL https://raw.githubusercontent.com/larsoss/clea
 ## Terugdraaien
 
 ```powershell
-ssh root@192.168.4.44 "curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-couch/main/tools/install-couch.sh | sh -s undo"
+ssh root@192.168.4.44 "curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-WebOS/couch/tools/install-couch.sh | sh -s undo"
 ```
 
 Dit zet de launcher en de servicebestanden van vóór de installatie terug en kiest het thema **Classic**. Wil je alleen een ander thema? Dat kan gewoon via **Customise > Theme** op de tv.

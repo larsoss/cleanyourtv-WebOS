@@ -1,6 +1,6 @@
 #!/bin/sh
 # Couch edition: puts the Home Assistant weather card in a place on Home, without the phone page. Run it on the TV, as root:
-#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-couch/main/tools/couch-weather.sh | sh -s weather.forecast_thuis sensor.knmi_temperatuur
+#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-WebOS/couch/tools/couch-weather.sh | sh -s weather.forecast_thuis sensor.knmi_temperatuur
 # Arguments: the weather entity, optionally a sensor for the temperature outside, optionally the place (default row, above the dock)
 # and the forecast (daily, hourly or none). It opens the cards' phone page for a moment, saves the card the way that page does (the
 # other places keep their cards) and closes it again.

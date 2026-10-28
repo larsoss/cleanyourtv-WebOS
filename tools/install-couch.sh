@@ -1,8 +1,8 @@
 #!/bin/sh
 # Puts the Couch look (scenes, glass clock, glass Home Assistant cards) on a TV that already runs CleanYourTV. Run it on the TV, as root:
-#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-couch/main/tools/install-couch.sh | sh
-#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-couch/main/tools/install-couch.sh | sh -s undo
-#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-couch/main/tools/install-couch.sh | sh -s status
+#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-WebOS/couch/tools/install-couch.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-WebOS/couch/tools/install-couch.sh | sh -s undo
+#   curl -fsSL https://raw.githubusercontent.com/larsoss/cleanyourtv-WebOS/couch/tools/install-couch.sh | sh -s status
 # It downloads this repository, keeps a copy of what is on the TV now in /media/developer/cleanyourtv/backup-couch, replaces the
 # service files and the launcher the way an update from the manager app does, makes the TV follow this repository (themes and updates
 # come from here, so an update of the original project does not overwrite it), restarts the service and chooses the Couch theme.
@@ -13,8 +13,8 @@
 # /media/developer is changed.
 set -e
 export PATH=/usr/bin:/usr/sbin:/bin:/sbin:$PATH
-REPO=${COUCH_REPO:-larsoss/cleanyourtv-couch}
-BR=${COUCH_BRANCH:-main}
+REPO=${COUCH_REPO:-larsoss/cleanyourtv-WebOS}
+BR=${COUCH_BRANCH:-couch}
 D=/media/developer/cleanyourtv
 SVC=/media/developer/apps/usr/palm/services/com.cleanyourtv.manager.service
 MGR=/media/developer/apps/usr/palm/applications/com.cleanyourtv.manager
