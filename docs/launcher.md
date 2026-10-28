@@ -83,7 +83,7 @@ same place.
 In the Couch edition, **Customise** > **Home Assistant** (the first row, in themes with places for cards) chooses the cards with
 the remote: for each place the kind of card (Home Assistant weather, entity, entities, camera, greeting or empty) and what it shows,
 picked from the entities Home Assistant has (a weather entity and a temperature sensor for the weather card; for the entity cards
-first the kind, such as lights or sensors, then the entity). It saves the same settings as the phone page.
+first the kind, such as lights or sensors, then the entity). It saves the same settings as the phone page. Its first row, **Connection**, says whether Home Assistant is linked and opens the manager app's Home Assistant screen with the code for the phone page. A Home Assistant card stays hidden until Home Assistant is linked and an entity is chosen.
 
 Names, texts and the other options are typed on your phone: **Cards** > **Set up from your phone** in the manager app shows a QR
 code. The page shows a form for each place, and **Edit as JSON** shows all cards at once, for example

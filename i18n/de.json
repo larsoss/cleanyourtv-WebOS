@@ -719,5 +719,9 @@
  "Scenes": "Szenen",
  "Scripts": "Skripte",
  "Automations": "Automationen",
- "Helpers": "Helfer"
+ "Helpers": "Helfer",
+ "Connection": "Verbindung",
+ "Set up": "Eingerichtet",
+ "Not set up": "Nicht eingerichtet",
+ "Choose Connection to link Home Assistant: a code on the TV, the address and a token on your phone.": "Wähle Verbindung, um Home Assistant zu verbinden: ein Code auf dem Fernseher, Adresse und Token auf dem Handy."
 }

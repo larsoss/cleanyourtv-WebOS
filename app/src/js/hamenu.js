@@ -126,38 +126,42 @@ function hamPickAny(title, cb) {
 }
 /* Customise > Home Assistant: the places of the theme with what each shows */
 function haMenu() {
-  if (hamReady === null)
-    api('/api/cards/status', {}).then(
-      function (s) {
-        hamReady = !!s.ha;
-        refreshMenu();
-      },
-      function () {}
-    );
+  /* asked each time the menu opens: the link may have been set up in the manager app since */
+  api('/api/cards/status', {}).then(
+    function (s) {
+      hamReady = !!s.ha;
+      refreshMenu();
+    },
+    function () {}
+  );
   openBuilt('Home Assistant', function () {
-    var items = (TH.slots || []).map(function (sl) {
-      return {
+    /* the link with Home Assistant (address and token): set up from a phone, through the manager app's Home Assistant screen */
+    var items = [
+      {
+        label: t('Connection'),
+        sub: hamReady === null ? '\u2026' : hamReady ? t('Set up') : t('Not set up'),
+        fn: function () {
+          launch('com.cleanyourtv.manager', { open: 'ha' });
+        },
+      },
+      { sep: true },
+    ];
+    (TH.slots || []).forEach(function (sl) {
+      items.push({
         label: hamPlace(sl),
         sub: hamSummary(hamCard(sl)),
         stay: true,
         fn: function () {
           hamPlaceMenu(sl);
         },
-      };
+      });
     });
-    if (!items.length)
+    if (!(TH.slots || []).length)
       items.push({ note: t('This theme has no places for cards. Choose a theme with cards (Lock Screen) in Customise > Theme.') });
     if (hamReady === false)
       items.push(
         { sep: true },
-        { note: t('Home Assistant is not set up yet: set its address and token in the manager app, More > Home Assistant.') },
-        {
-          label: t('More settings...'),
-          sub: t('in the CleanYourTV app'),
-          fn: function () {
-            launch('com.cleanyourtv.manager');
-          },
-        }
+        { note: t('Choose Connection to link Home Assistant: a code on the TV, the address and a token on your phone.') }
       );
     return items;
   });

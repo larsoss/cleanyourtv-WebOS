@@ -719,5 +719,9 @@
  "Scenes": "Scènes",
  "Scripts": "Scripts",
  "Automations": "Automatiseringen",
- "Helpers": "Helpers"
+ "Helpers": "Helpers",
+ "Connection": "Koppeling",
+ "Set up": "Ingesteld",
+ "Not set up": "Niet ingesteld",
+ "Choose Connection to link Home Assistant: a code on the TV, the address and a token on your phone.": "Kies Koppeling om Home Assistant te koppelen: een code op de tv, het adres en een token op je telefoon."
 }

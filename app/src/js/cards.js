@@ -217,6 +217,17 @@ function hawNum(x) {
   if (x === null || x === undefined) return '\u2013';
   return Math.abs(x) < 10 && Math.round(x) !== x ? (Math.round(x * 10) / 10).toLocaleString(LOC) : String(Math.round(x));
 }
+/* a Home Assistant card is left out while there is nothing to show yet: Home Assistant not set up on the TV, or no entity chosen
+   (Customise > Home Assistant sets both); a card that is hidden is not a place for the focus either */
+var HA_NOT_SET = 'Home Assistant is not set up';
+function haHide(el, hide) {
+  var d = hide ? 'none' : '';
+  if (el.style.display !== d) {
+    el.style.display = d;
+    if (!hide && window.SCENES) SCENES.glassCards();
+  }
+  return hide;
+}
 /* camera cards get a new picture on their own schedule (every 10, 30 or 60 seconds) while Home is shown */
 setInterval(function () {
   if (document.hidden) return;
@@ -340,6 +351,7 @@ var CARD_TYPES = {
         name = String(o.name || (e && e.name) || id).slice(0, 60),
         st = e ? haState(e) : HA.err ? t(HA.err) : id ? '\u2026' : t('Choose an entity from your phone'),
         key = id + '|' + name + '|' + st + '|' + (e ? e.state : '');
+      haHide(el, !id || HA.err === HA_NOT_SET);
       el._o = { action: 'card', label: name };
       el.classList.toggle('on', !!e && e.state === 'on');
       if (el._k === key) return;
@@ -387,6 +399,7 @@ var CARD_TYPES = {
         }),
         title = String(o.title || '').slice(0, 60),
         key = title + JSON.stringify(rows) + HA.err;
+      haHide(el, !ids.length || HA.err === HA_NOT_SET);
       if (el._k === key) return;
       el._k = key;
       var h = title ? '<div class="ha-title"></div>' : '';
@@ -412,6 +425,7 @@ var CARD_TYPES = {
     },
     draw: function (el, o) {
       var id = String(o.entity || '').trim();
+      haHide(el, !id || HA.err === HA_NOT_SET);
       if (el._k === id) return;
       el._k = id;
       if (!/^camera\./.test(id)) {
@@ -457,6 +471,7 @@ var CARD_TYPES = {
     draw: function (el, o) {
       var w = hawFor(o),
         h;
+      if (haHide(el, !o.entity || (w && w.error === HA_NOT_SET))) return;
       if (!w || w.error || !w.now) {
         h = '<div class="hw-msg"></div>';
         var m = !o.entity ? t('Choose a weather entity from your phone') : w && w.error ? t(w.error) : '\u2026';
@@ -585,7 +600,7 @@ function cardTargets() {
     els = $('cards').children;
   for (var i = 0; i < els.length; i++) {
     var ty = CARD_TYPES[els[i]._card.type];
-    if (ty.act) out.push(els[i]);
+    if (ty.act && els[i].style.display !== 'none') out.push(els[i]);
   }
   return out;
 }

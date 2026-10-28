@@ -46,6 +46,16 @@ function wantView() {
     p = JSON.parse(window.webOSSystem.launchParams || '{}');
   } catch (e) {}
   if (p && p.open === 'wallpapers') openWallpapers();
+  /* Couch edition: the launcher's Customise > Home Assistant > Connection opens the Home Assistant screen with its phone page */
+  if (p && p.open === 'ha')
+    api('/api/voice/status').then(
+      function (v) {
+        vo = v;
+        push('ha');
+        openHaPair();
+      },
+      function () {}
+    );
   if (p && p.open === 'cards') {
     cardsFromHome = true;
     openCards();
