@@ -205,6 +205,14 @@ run(async () => {
   ok(r.code === 200 && r4.code === 404, "a camera's picture is passed on, and only for camera entities");
   p = await phone('GET', '/api/entities', undefined, code);
   ok(p.j.entities.length === 4 && p.j.entities[0].id === 'light.living', 'the phone page lists the entities to choose from');
+  r = await call(cards, '/api/cards/ha/entities', 'POST', { domains: ['weather', 'sensor'] });
+  ok(
+    r.j.ha === true &&
+      r.j.entities.length === 2 &&
+      r.j.entities.every(e => e.domain === 'weather' || e.domain === 'sensor') &&
+      r.j.entities.some(e => e.unit === '°C'),
+    "the launcher's Home Assistant menu gets the entities of the domains it asks for, with their units"
+  );
   // the Home Assistant weather card: the condition, the temperature from a sensor when one is chosen, and the forecast
   r = await call(cards, '/api/cards/ha/weather', 'POST', { id: 'weather.home', temp: 'sensor.temp', kind: 'daily' });
   ok(

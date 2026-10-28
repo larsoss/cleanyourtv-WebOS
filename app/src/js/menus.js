@@ -619,6 +619,8 @@ function customizeMenu() {
   openBuilt(t('Customise'), function () {
     var nh = hiddenIds().length;
     return [
+      /* the cards in the theme's places, chosen with the remote (hamenu.js); first, so it is found */
+      (TH.slots || []).length ? { label: 'Home Assistant', sub: t('Cards on Home'), stay: true, fn: haMenu } : null,
       { label: t('Dock'), stay: true, fn: dockMenu },
       { label: t('Top buttons'), stay: true, fn: topButtonsMenu },
       { label: t('Hidden apps'), sub: nh ? String(nh) : '', stay: true, fn: hiddenMenu },
@@ -653,7 +655,7 @@ function customizeMenu() {
       },
       { sep: true },
       { label: t('Theme'), stay: true, fn: themeMenu },
-      /* only where the theme has slots for cards */
+      /* only where the theme has slots for cards: the cards chosen with the remote (hamenu.js), and on the phone for texts */
       (TH.slots || []).length
         ? {
             label: t('Cards'),

@@ -299,6 +299,8 @@ function create(ctx) {
     // Home Assistant cards: {ids} -> their states (kept 20 s); {id} -> switched (lights, switches, fans, scenes, scripts)
     if (u === '/api/cards/ha') return web.json(res, await ha.states(b.ids));
     if (u === '/api/cards/ha/toggle') return web.json(res, await ha.toggle(b.id));
+    // the launcher's Home Assistant menu: {domains} -> the entities to choose from
+    if (u === '/api/cards/ha/entities') return web.json(res, Object.assign({ ha: ha.ready() }, await ha.pick(b.domains)));
     // the Home Assistant weather card: {id, temp, kind} -> the condition now and the forecast (kept 15 minutes)
     if (u === '/api/cards/ha/weather')
       return web.json(res, await ha.weather(String(b.id || ''), String(b.temp || ''), b.kind === undefined ? 'daily' : String(b.kind)));

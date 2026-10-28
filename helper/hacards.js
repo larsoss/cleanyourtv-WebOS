@@ -167,7 +167,24 @@ function create(opts) {
       .slice(0, 2000)
       .map(e => ({ id: e.id, name: e.name }));
   }
-  return { ready, states, toggle, camera, entities, weather };
+  // the entities for the launcher's Home Assistant menu: id, name, domain and unit, of the given domains (all when none), at most 600
+  async function pick(domains) {
+    if (!ready()) return { error: 'Home Assistant is not set up' };
+    const want = (Array.isArray(domains) ? domains : []).filter(d => typeof d === 'string' && /^[a-z_]{1,40}$/.test(d)).slice(0, 20);
+    try {
+      return {
+        entities: (await list())
+          .map(short)
+          .filter(e => !want.length || want.indexOf(e.domain) >= 0)
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .slice(0, 600)
+          .map(e => ({ id: e.id, name: e.name, domain: e.domain, unit: e.unit })),
+      };
+    } catch (e) {
+      return { error: String(e.message || e) };
+    }
+  }
+  return { ready, states, toggle, camera, entities, weather, pick };
 }
 
 module.exports = { create, TOGGLE, RUN };
