@@ -36,7 +36,7 @@ if [ "$1" = status ]; then
   say "service running:               $(pgrep -f cleanyourtv/helper.js >/dev/null && echo yes || echo no)"
   say "theme the service hands out:   $(curl -s localhost:8765/api/theme/list | grep -o '"current":{[^}]*}')"
   say "last error:                    $(cat $D/last-error.txt 2>/dev/null || echo none)"
-  say "watchdog:                      $([ -L /var/lib/webosbrew/init.d/20-couch-watchdog ] && echo installed || echo not installed)"
+  say "watchdog:                      $(pgrep -f '[c]leanyourtv/watchdog.sh' >/dev/null && echo running || echo 'not running (starts at the next boot)')"
   tail -n 5 /tmp/cleanyourtv-helper.log 2>/dev/null | sed 's/^/couch: log: /'
   exit 0
 fi
@@ -147,15 +147,17 @@ swap_app $D/app.next
 # themes and updates from this repository from now on
 echo "$REPO $BR" >$D/source
 
-# a watchdog that starts the service again if it stops (see scripts/couch-watchdog.sh), at boot and now
-cp $S/scripts/couch-watchdog.sh $D/couch-watchdog.sh
-mkdir -p /var/lib/webosbrew/init.d
-ln -sf $D/couch-watchdog.sh /var/lib/webosbrew/init.d/20-couch-watchdog
+# the boot script and its watchdog (scripts/watchdog.sh, proposed upstream): it starts the service again if it stops. An earlier
+# version of this installer used a separate 20-couch-watchdog; that one goes, so two watchdogs never race.
+cp $S/scripts/10-cleanyourtv-home $S/scripts/watchdog.sh $D/
+rm -f /var/lib/webosbrew/init.d/20-couch-watchdog $D/couch-watchdog.sh
+[ -f /tmp/couch-watchdog.pid ] && kill "$(cat /tmp/couch-watchdog.pid)" 2>/dev/null || true
+rm -f /tmp/couch-watchdog.pid
+pgrep -f "[c]leanyourtv/watchdog.sh" >/dev/null || (sh $D/watchdog.sh </dev/null >/dev/null 2>&1 &)
 
 say "restarting the service"
 restart_service
 theme couchtv
 sh $D/reload-home.sh >/dev/null 2>&1 || true
-sh $D/couch-watchdog.sh || true
 rm -rf $T
 say "done. Choose the cards on Home: Customise > Home Assistant"
