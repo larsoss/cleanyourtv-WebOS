@@ -17,6 +17,7 @@ REPO=${COUCH_REPO:-larsoss/cleanyourtv-couch}
 BR=${COUCH_BRANCH:-main}
 D=/media/developer/cleanyourtv
 SVC=/media/developer/apps/usr/palm/services/com.cleanyourtv.manager.service
+MGR=/media/developer/apps/usr/palm/applications/com.cleanyourtv.manager
 B=$D/backup-couch
 T=/tmp/cytv-couch
 
@@ -81,6 +82,7 @@ if [ "$1" = undo ]; then
     [ -d $B/svc/i18n ] && files $B/svc/i18n $SVC/i18n
     [ -d $B/svc/app ] && files $B/svc/app $SVC/payload/app
   fi
+  [ -f $B/manager-index.html ] && cp $B/manager-index.html $MGR/index.html
   rm -rf $D/app.next
   cp -r $B/app $D/app.next
   swap_app $D/app.next
@@ -120,6 +122,9 @@ if [ -f $SVC/helper/helper.js ] && [ ! -f $B/svc/helper/helper.js ] && ! grep -q
   [ -d $SVC/i18n ] && files $SVC/i18n $B/svc/i18n
   [ -d $SVC/payload/app ] && files $SVC/payload/app $B/svc/app
 fi
+if [ -f $MGR/index.html ] && [ ! -f $B/manager-index.html ] && ! grep -q "open === 'ha'" $MGR/index.html; then
+  cp $MGR/index.html $B/manager-index.html
+fi
 
 say "installing the service files"
 cp $S/helper/*.js $D/
@@ -130,6 +135,9 @@ if [ -d $SVC/helper ]; then
   [ -d $SVC/i18n ] && files $S/i18n $SVC/i18n
   [ -d $SVC/payload/app ] && files $S/app $SVC/payload/app
 fi
+
+# the manager app's page: it can open its Home Assistant screen for the launcher's Customise > Home Assistant > Connection
+[ -f $MGR/index.html ] && [ -f $S/manager/app/index.html ] && cp $S/manager/app/index.html $MGR/index.html
 
 say "installing the launcher"
 rm -rf $D/app.next
@@ -150,4 +158,4 @@ theme couchtv
 sh $D/reload-home.sh >/dev/null 2>&1 || true
 sh $D/couch-watchdog.sh || true
 rm -rf $T
-say "done. Set up the weather card in the manager app: Cards > Set up from your phone"
+say "done. Choose the cards on Home: Customise > Home Assistant"
