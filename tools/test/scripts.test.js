@@ -2,7 +2,7 @@
 const fs = require('fs'),
   path = require('path'),
   cp = require('child_process');
-const { root, tmp, ok, run } = require('./lib');
+const { root, tmp, ok, run, sleep } = require('./lib');
 
 run(async () => {
   const scripts = fs
@@ -164,4 +164,48 @@ run(async () => {
       !/TESTED_SDK/.test(bootText),
     'the setup takes the window type and the compatibility list from tvprofile.js'
   );
+
+  // the watchdog (watchdog.sh) starts a service that has stopped again, keeps the log of the run that ended, and stops when
+  // CleanYourTV is gone. A stand-in service that only counts its starts; the address it asks answers nothing.
+  const W = path.join(tmp, 'wd'),
+    mark = path.join(W, 'starts'),
+    slog = path.join(W, 'helper.log'),
+    blog = path.join(W, 'boot.log');
+  fs.mkdirSync(W);
+  fs.writeFileSync(
+    path.join(W, 'helper.js'),
+    "require('fs').appendFileSync(process.env.WD_MARK, 'start\\n'); setInterval(function () {}, 1000);\n"
+  );
+  fs.writeFileSync(slog, 'the run that ended\n');
+  const starts = () => (fs.existsSync(mark) ? fs.readFileSync(mark, 'utf8').split('\n').filter(Boolean).length : 0);
+  const kill = () => cp.spawnSync('pkill', ['-f', W + '/helper.js']);
+  const wd = cp.spawn('sh', [path.join(root, 'scripts', 'watchdog.sh')], {
+    env: Object.assign({}, process.env, {
+      CYTV_DIR: W,
+      CYTV_BOOT_LOG: blog,
+      CYTV_SERVICE_LOG: slog,
+      CYTV_SERVICE_URL: 'http://127.0.0.1:9/none',
+      CYTV_WATCH_SECS: '1',
+      WD_MARK: mark,
+    }),
+    stdio: 'ignore',
+  });
+  let exited = false;
+  wd.on('exit', () => (exited = true));
+  for (let i = 0; i < 40 && starts() < 1; i++) await sleep(100);
+  await sleep(2500);
+  ok(
+    starts() === 1 &&
+      /watchdog: the service had stopped; starting it again/.test(fs.readFileSync(blog, 'utf8')) &&
+      fs.readFileSync(path.join(W, 'helper.crash.log'), 'utf8') === 'the run that ended\n',
+    'the watchdog starts a stopped service once, says so in the boot log and keeps the log of the run that ended'
+  );
+  kill();
+  for (let i = 0; i < 40 && starts() < 2; i++) await sleep(100);
+  ok(starts() === 2, 'it starts the service again each time it stops');
+  fs.unlinkSync(path.join(W, 'helper.js'));
+  for (let i = 0; i < 40 && !exited; i++) await sleep(100);
+  kill();
+  if (!exited) wd.kill();
+  ok(exited, 'the watchdog ends when CleanYourTV is no longer installed');
 });

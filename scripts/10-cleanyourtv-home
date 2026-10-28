@@ -72,14 +72,6 @@ else
     esac
   ) </dev/null >/dev/null 2>&1 &
 fi
-# Watchdog: if the helper stays unreachable for 60 s, fall back to stock Home until next reboot.
-(
-  bad=0
-  while replaced; do
-    sleep 10
-    if curl -s -m 3 -o /dev/null http://127.0.0.1:8765/api/foreground; then bad=0; else
-      pgrep -f cleanyourtv/helper.js >/dev/null || (nohup node $L/helper.js >/tmp/cleanyourtv-helper.log 2>&1 </dev/null &)
-      bad=$((bad+1)); [ $bad -ge 6 ] && { sh $L/undo-home.sh temp; break; }
-    fi
-  done
-) </dev/null >/dev/null 2>&1 &
+# Watchdog (watchdog.sh): starts the service again when it has stopped, and if it stays unreachable for 60 s, falls back to stock
+# Home until next reboot.
+pgrep -f "[c]leanyourtv/watchdog.sh" >/dev/null || (sh $L/watchdog.sh </dev/null >/dev/null 2>&1 &)
