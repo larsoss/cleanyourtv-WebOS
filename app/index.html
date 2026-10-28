@@ -347,14 +347,23 @@ body {
 [data-grid="push"].grid-open #shelf {
   opacity: 0;
 }
-/* every row of tiles centred, also a last row that is not full */
+/* every row of tiles centred, also a last row that is not full. A flex row, spaced with margins: Chromium before 84 (webOS 5 and 6)
+   ignores gap in flex, so the tiles touched there and a tenth one fitted in a nine-column row. The grid is widened by one gap so the
+   half gaps at the ends cancel out. */
 [data-galign="center"] #grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  margin-left: calc(var(--gap-x) / -2);
+  width: calc(var(--grid-w) + var(--gap-x));
+}
+/* the grid's own gap (#grid) would add to the margins where flex gap works: off for the centred row */
+[data-galign="center"] #grid {
+  gap: 0;
 }
 [data-galign="center"] #grid .tile {
   width: var(--tile-w);
+  margin: 0 calc(var(--gap-x) / 2) var(--gap-y);
 }
 .tile::after {
   content: "";
