@@ -78,6 +78,13 @@ const SCHEMA = [
   ['clock.y', 'int', [0, 900], 54, 'Distance from the top or bottom edge, in px.'],
   ['clock.scale', 'num', [0.6, 2.5], 1, 'Scale of the time.'],
   ['clock.dateScale', 'num', [0.6, 2], 1, 'Scale of the date.'],
+  [
+    'clock.style',
+    'enum',
+    ['text', 'glass'],
+    'text',
+    '`text`: the time as text; `glass`: a large glass clock centred near the top (Antonio, frosted with the background). With `effects.scenes` each scene places it, and the date moves above it; the other clock settings then only set the date.',
+  ],
   ['bar.show', 'bool', null, true, 'Show the top buttons (Inputs, Settings, Customise, ...).'],
   [
     'bar.style',
@@ -175,6 +182,21 @@ const SCHEMA = [
     'A file name in `themes/wallpapers/`: `.jpg`, `.png` or `.webp`, at most 1.5 MB; drawn at 1920 x 1080.',
   ],
   ['effects.wallpaperDim', 'num', [0, 0.9], 0.4, 'How far the wallpaper is darkened with the background colour.'],
+  [
+    'effects.scenes',
+    'enum',
+    ['off', 'couch'],
+    'off',
+    '`couch`: five landscapes shipped with the launcher take turns behind Home (Night, Golden hour, Waterline, Fog, Dawn); with `clock.style` glass the scenery stands in front of the clock. Takes the place of the wallpaper and of Wallpapers.',
+  ],
+  ['effects.sceneSecs', 'int', [10, 600], 20, 'Seconds each scene stays (`effects.scenes`).'],
+  [
+    'cards.style',
+    'enum',
+    ['flat', 'glass'],
+    'flat',
+    '`glass`: the weather and Home Assistant cards sit on frosted glass (a blurred copy of the scene behind them, no live blur).',
+  ],
 ];
 const DEFAULTS = {};
 for (const r of SCHEMA) DEFAULTS[r[0]] = r[3];
@@ -431,11 +453,15 @@ function resolve(t, accent) {
     '--spd': String(v['effects.speed']),
   };
   const w = v['effects.wallpaper'];
+  // glass and scenes: only themes that use them carry these keys, so the replies for every other theme stay as they were
+  const attrs = { bar: v['bar.style'], labels, clock: v['clock.layout'], grid: mode, galign: v['grid.align'] };
+  if (v['clock.style'] === 'glass') attrs.cstyle = 'glass';
+  if (v['cards.style'] === 'glass') attrs.cards = 'glass';
   const out = {
     id: t.id,
     name: t.name,
     vars,
-    attrs: { bar: v['bar.style'], labels, clock: v['clock.layout'], grid: mode, galign: v['grid.align'] },
+    attrs,
     cols: v['grid.cols'],
     tileH: v['grid.tileH'],
     gapY: v['grid.gapY'],
@@ -449,6 +475,7 @@ function resolve(t, accent) {
     nightRgb: night.join(','),
     wallpaper: w ? { id: t.id, file: w, dim: v['effects.wallpaperDim'] } : null,
   };
+  if (v['effects.scenes'] !== 'off') out.scenes = { set: v['effects.scenes'], secs: v['effects.sceneSecs'] };
   // only a theme with slots has this key (the same reason)
   if (v.slots && v.slots.length)
     out.slots = v.slots.map(sl => {

@@ -1,0 +1,111 @@
+{
+  "name": "Couch",
+  "author": "larsoss, after couch-tv",
+  "description": "After couch-tv: five landscapes take turns behind a large glass clock, the scenery in front of the digits, apps on glass at the bottom and frosted glass cards.",
+  "colors": {
+    "night": "#0b0d1a",
+    "panel": "#1a1d2e",
+    "ink": "#ffffff",
+    "accent": "#ffffff",
+    "pill": "#ffffff"
+  },
+  "surface": {
+    "pillAlpha": 0.16,
+    "pillRing": 0.24,
+    "menuAlpha": 0.94,
+    "rowRadius": 24
+  },
+  "type": {
+    "fontFile": "inter.woff2",
+    "scale": 1
+  },
+  "clock": {
+    "style": "glass",
+    "show": true,
+    "date": true,
+    "greeting": false,
+    "dateScale": 1
+  },
+  "bar": {
+    "show": true,
+    "style": "round",
+    "labels": "hide",
+    "anchor": "top",
+    "align": "right",
+    "x": 96,
+    "y": 64,
+    "size": 64,
+    "gap": 14
+  },
+  "shelf": {
+    "show": false
+  },
+  "dock": {
+    "anchor": "bottom",
+    "align": "center",
+    "x": 0,
+    "y": 56,
+    "count": 7,
+    "w": 176,
+    "h": 112,
+    "gap": 22,
+    "radius": 24,
+    "panel": 0.16,
+    "panelPad": 18,
+    "tileAlpha": 1,
+    "tileFrost": 0.25,
+    "tileFrostColor": "#ffffff",
+    "lift": 6,
+    "focusScale": 1.08
+  },
+  "grid": {
+    "mode": "push",
+    "dockUp": 300,
+    "align": "center",
+    "cols": 9,
+    "tileH": 140,
+    "gapX": 22,
+    "gapY": 22,
+    "radius": 24,
+    "clipTop": 280,
+    "focusScale": 1.1
+  },
+  "tile": {
+    "gloss": 0.12,
+    "border": 0.2,
+    "ringWidth": 3,
+    "ringOffset": 4
+  },
+  "effects": {
+    "glow": 0,
+    "speed": 1,
+    "scenes": "couch",
+    "sceneSecs": 20
+  },
+  "cards": {
+    "style": "glass"
+  },
+  "slots": [
+    {
+      "id": "row",
+      "anchor": "top",
+      "align": "left",
+      "x": 96,
+      "y": 640,
+      "w": 860,
+      "h": 200,
+      "card": "ha-weather",
+      "grid": "hide"
+    },
+    {
+      "id": "side",
+      "anchor": "top",
+      "align": "right",
+      "x": 96,
+      "y": 640,
+      "w": 560,
+      "h": 200,
+      "grid": "hide"
+    }
+  ]
+}

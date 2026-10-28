@@ -684,5 +684,18 @@
  "Uninstall %s?": "Uninstall %s?",
  "Uninstalling %s...": "Uninstalling %s...",
  "%s uninstalled.": "%s uninstalled.",
- "Could not uninstall %s.": "Could not uninstall %s."
+ "Could not uninstall %s.": "Could not uninstall %s.",
+ "Home Assistant weather": "Home Assistant weather",
+ "Choose a weather entity from your phone": "Choose a weather entity from your phone",
+ "Sunny": "Sunny",
+ "Heavy rain": "Heavy rain",
+ "Sleet": "Sleet",
+ "Hail": "Hail",
+ "Windy": "Windy",
+ "Exceptional weather": "Exceptional weather",
+ "Weather entity": "Weather entity",
+ "Outside temperature sensor (optional)": "Outside temperature sensor (optional)",
+ "Forecast": "Forecast",
+ "The next days": "The next days",
+ "The next hours": "The next hours"
 }

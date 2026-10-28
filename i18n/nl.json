@@ -684,5 +684,18 @@
  "Uninstall %s?": "%s verwijderen?",
  "Uninstalling %s...": "%s wordt verwijderd...",
  "%s uninstalled.": "%s verwijderd.",
- "Could not uninstall %s.": "Kon %s niet verwijderen."
+ "Could not uninstall %s.": "Kon %s niet verwijderen.",
+ "Sunny": "Zonnig",
+ "Heavy rain": "Zware regen",
+ "Sleet": "Natte sneeuw",
+ "Hail": "Hagel",
+ "Windy": "Winderig",
+ "Exceptional weather": "Uitzonderlijk weer",
+ "Home Assistant weather": "Home Assistant-weer",
+ "Choose a weather entity from your phone": "Kies een weer-entiteit op je telefoon",
+ "Weather entity": "Weer-entiteit",
+ "Outside temperature sensor (optional)": "Sensor buitentemperatuur (optioneel)",
+ "Forecast": "Verwachting",
+ "The next days": "De komende dagen",
+ "The next hours": "De komende uren"
 }

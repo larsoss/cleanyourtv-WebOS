@@ -105,6 +105,19 @@ run(async () => {
     plain.vars['--greet-d'] === 'none' && plain.vars['--dock-tile-alpha'] === '1',
     'by default there is no greeting and the dock tiles are opaque'
   );
+  // clock.style, effects.scenes and cards.style (scenes.js): only a theme that uses them carries the keys, so other replies stay the same
+  const couch = themeMod.resolve(
+    themeMod.normalize({ clock: { style: 'glass' }, effects: { scenes: 'couch', sceneSecs: 5 }, cards: { style: 'glass' } }, 'couch')
+  );
+  ok(
+    couch.attrs.cstyle === 'glass' && couch.attrs.cards === 'glass' && couch.scenes.set === 'couch' && couch.scenes.secs === 10,
+    'the glass clock, the scenes (seconds clamped to 10 or more) and glass cards reach the launcher'
+  );
+  const odd = themeMod.resolve(themeMod.normalize({ clock: { style: 'neon' }, effects: { scenes: 'beach' } }, 'odd'));
+  ok(
+    !('cstyle' in plain.attrs) && !('cards' in plain.attrs) && !('scenes' in plain) && !('cstyle' in odd.attrs) && !('scenes' in odd),
+    'without them (or with an unknown value) the text clock and no scenes, and no new keys in the reply'
+  );
   // dock.tileFrost and dock.tileFrostColor: a tint over the resting tiles, its colour resolved to an rgb triple
   const frost = themeMod.resolve(themeMod.normalize({ dock: { tileFrost: 0.4, tileFrostColor: '#ffffff' } }, 'frost'));
   ok(

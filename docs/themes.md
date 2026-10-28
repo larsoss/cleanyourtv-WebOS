@@ -37,6 +37,7 @@ folder of the GitHub repository (the `main` branch):
 | Bloom | A flower wallpaper with the dock in a glass panel at the bottom. Down moves the dock up and the apps appear below it, centred. It has slots for cards. |
 | Horizon | A row of seven square apps along the bottom of a dusk landscape, the clock on the left and the buttons on the right at the top. Down moves the row up and shows all apps below it. It has slots for cards. |
 | Pixel | Pixel art: a blocky typeface, square tiles and buttons, a yellow focus box and a sunset over a lake drawn in big pixels. Moves without animation, like an old console. |
+| Couch | After [couch-tv](https://github.com/Seagey/couch-tv): five landscapes take turns every 20 seconds behind a large glass clock, the scenery in front of the digits; the date above the clock, round buttons top right, the apps on glass at the bottom, and a Home Assistant weather card on frosted glass. Uses `clock.style`, `effects.scenes` and `cards.style`. |
 | Lock Screen | A phone-style lock screen: a greeting and a big clock top left, and a small, translucent dock low in the corner over a calm blue landscape, so the picture fills the screen. Down moves the dock up and shows all apps below it. Turn Wallpapers on for your own photos. It has slots for cards (Customise > Cards): the greeting is one. |
 
 ![Classic, Compact, Large print and Midnight](screenshots/themes-1.jpg)
@@ -167,6 +168,7 @@ when the focus moves down into it (Back or Up closes it); a dock at the top leav
 | `clock.y` | 0 to 900 | `54` | Distance from the top or bottom edge, in px. |
 | `clock.scale` | 0.6 to 2.5 | `1` | Scale of the time. |
 | `clock.dateScale` | 0.6 to 2 | `1` | Scale of the date. |
+| `clock.style` | `text`, `glass` | `text` | `text`: the time as text; `glass`: a large glass clock centred near the top (Antonio, frosted with the background). With `effects.scenes` each scene places it, and the date moves above it; the other clock settings then only set the date. |
 | **bar** | | | |
 | `bar.show` | `true` or `false` | `true` | Show the top buttons (Inputs, Settings, Customise, ...). |
 | `bar.style` | `pill`, `round`, `flat` | `pill` | `pill`: icon and label on a rounded button; `round`: icon only in a circle; `flat`: no background. |
@@ -228,7 +230,26 @@ when the focus moves down into it (Back or Up closes it); a dock at the top leav
 | `effects.speed` | 0 to 2 | `1` | Animation speed multiplier; 0 switches the animations off. |
 | `effects.wallpaper` | a file name | none | A file name in `themes/wallpapers/`: `.jpg`, `.png` or `.webp`, at most 1.5 MB; drawn at 1920 x 1080. |
 | `effects.wallpaperDim` | 0 to 0.9 | `0.4` | How far the wallpaper is darkened with the background colour. |
+| `effects.scenes` | `off`, `couch` | `off` | `couch`: five landscapes shipped with the launcher take turns behind Home (Night, Golden hour, Waterline, Fog, Dawn); with `clock.style` glass the scenery stands in front of the clock. Takes the place of the wallpaper and of Wallpapers. |
+| `effects.sceneSecs` | 10 to 600 | `20` | Seconds each scene stays (`effects.scenes`). |
+| **cards** | | | |
+| `cards.style` | `flat`, `glass` | `flat` | `glass`: the weather and Home Assistant cards sit on frosted glass (a blurred copy of the scene behind them, no live blur). |
 <!-- schema:end -->
+
+### Scenes and the glass clock
+
+`effects.scenes` `couch` shows five landscapes that ship with the launcher (Night, Golden hour, Waterline, Fog, Dawn), each for
+`effects.sceneSecs` seconds, cross-faded. They take the place of `effects.wallpaper` and of [Wallpapers](wallpapers.md).
+`clock.style` `glass` draws the time as a large glass clock in Antonio: its fill is a blurred, brightened copy of the scene, with a thin
+rim and a sheen. In four scenes the scenery is cut out of the photo and drawn over the clock, so the peaks stand in front of the digits;
+in Waterline the clock sits on the water with a reflection under it. Each scene places the clock and the date above it, so the other
+`clock.*` settings then only set the date's size and whether it shows. Without scenes the glass clock has a white frosted fill. After
+10 pm the scenes dim a little. Everything is drawn once a minute; only opacity animates. The scenes and the clock come from
+[couch-tv](https://github.com/Seagey/couch-tv) (MIT; the scenes were generated for that project and are free to use, the typeface is
+Antonio under the SIL Open Font License, see `THIRD-PARTY.md`).
+
+`cards.style` `glass` puts the weather and Home Assistant cards on frosted glass: the same blurred copy of the current scene, placed
+where the card is, under a dark tint. Without scenes it is a plain translucent panel.
 
 ### Slots for cards
 

@@ -210,6 +210,7 @@ document.addEventListener('visibilitychange', function () {
       return;
     }
     WALL.hidden();
+    SCENES.hidden();
     if (LIVE.on) LIVE.exit();
     closeRunningMenu();
   } else if (guarded()) LIVE.resume();
@@ -220,6 +221,7 @@ document.addEventListener('visibilitychange', function () {
     load();
     refreshSoon();
     WALL.shown();
+    SCENES.shown();
   }
 });
 
@@ -238,6 +240,7 @@ function tick() {
     g.textContent = h < 12 ? t('Good morning') : h < 18 ? t('Good afternoon') : t('Good evening');
   }
   tickCards();
+  SCENES.tick();
 }
 setInterval(tick, 15000);
 tick();

@@ -27,6 +27,8 @@ const theme = require(path.join(ROOT, 'helper', 'theme.js')).create({ config: re
 const NAMES = ['Streaming', 'Video', 'Music', 'Photos', 'Games', 'Browser', 'News', 'Weather', 'Sports', 'Movies', 'Kids', 'Radio', 'Podcasts', 'Maps', 'Cooking', 'Fitness', 'Calendar', 'Notes', 'Files', 'Camera', 'Settings', 'Store'];
 const apps = NAMES.map((n, i) => ({ id: 'app.' + i, title: n, hue: (i * 47) % 360 }));
 const svg = a => `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="hsl(${a.hue},62%,46%)"/><circle cx="128" cy="116" r="54" fill="rgba(255,255,255,.88)"/><text x="128" y="205" font-family="Helvetica,Arial,sans-serif" font-size="40" font-weight="700" text-anchor="middle" fill="#fff">${a.title.slice(0, 6)}</text></svg>`;
+// a theme whose slot shows the Home Assistant weather card by default is shown with the made-up weather below
+const haWeatherCards = () => { const o = {}; for (const sl of theme.resolved().slots || []) if (sl.card === 'ha-weather') o[sl.id] = { type: 'ha-weather', entity: 'weather.home' }; return o; };
 const page = fs.readFileSync(path.join(ROOT, 'app', 'index.html'), 'utf8').replace('<script>', '<script>window.webOSSystem={launchParams:"{}"};', 1);
 const body = req => new Promise(res => { let b = ''; req.on('data', c => b += c); req.on('end', () => { try { res(JSON.parse(b || '{}')); } catch (_) { res({}); } }); });
 const srv = http.createServer(async (q, r) => {
@@ -35,8 +37,12 @@ const srv = http.createServer(async (q, r) => {
   const j = o => { r.writeHead(200, { 'content-type': 'application/json' }); r.end(JSON.stringify(o)); };
   if (u === '/home.html') { r.writeHead(200, { 'content-type': 'text/html' }); return r.end(page); }
   if (u.startsWith('/api/theme/')) return theme.handle(q, r, u, body);
-  if (u === '/api/apps') return j({ apps: apps.map(a => ({ id: a.id, title: a.title })), config: { dock: apps.slice(0, 6).map(a => a.id), theme: theme.resolved() }, usage: Object.fromEntries(apps.map((a, i) => [a.id, 1000 - i])), version: '9.9.9' });
+  if (u === '/api/apps') return j({ apps: apps.map(a => ({ id: a.id, title: a.title })), config: { dock: apps.slice(0, 6).map(a => a.id), theme: theme.resolved(), cards: haWeatherCards() }, usage: Object.fromEntries(apps.map((a, i) => [a.id, 1000 - i])), version: '9.9.9' });
   if (u === '/api/inputs') return j({ devices: [{ hdmiPlugIn: true, label: 'Game console', port: 1, appId: 'hdmi1', activate: false }, { hdmiPlugIn: false, label: 'HDMI 2', port: 2, appId: 'hdmi2', activate: false }] });
+  // the launcher's own files (the scenes and the clock's typeface), and a made-up Home Assistant weather for its card
+  const sf = /^\/([\w-]{1,60}\.(?:jpg|webp|woff2))$/.exec(u);
+  if (sf && fs.existsSync(path.join(ROOT, 'app', sf[1]))) { r.writeHead(200, { 'content-type': { jpg: 'image/jpeg', webp: 'image/webp', woff2: 'font/woff2' }[sf[1].split('.').pop()] }); return r.end(fs.readFileSync(path.join(ROOT, 'app', sf[1]))); }
+  if (u === '/api/cards/ha/weather') { const d0 = Date.now(), cs = ['partlycloudy', 'rainy', 'cloudy', 'sunny', 'sunny']; return j({ now: { cond: 'partlycloudy', temp: 8.4, unit: '°C', hum: 81, wind: 14, windUnit: 'km/h', name: 'Home' }, kind: 'daily', at: d0, list: cs.map((c, i) => ({ t: new Date(d0 + (i + 1) * 864e5).toISOString(), cond: c, hi: 11 - i, lo: 4 + (i % 3), rain: c === 'rainy' ? 70 : 0 })) }); }
   const m = /^\/icon\/(app\.\d+)$/.exec(u), a = m && apps.find(x => x.id === m[1]);
   if (a) { r.writeHead(200, { 'content-type': 'image/svg+xml' }); return r.end(svg(a)); }
   j({ returnValue: true });

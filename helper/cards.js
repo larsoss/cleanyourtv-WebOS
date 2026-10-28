@@ -109,6 +109,25 @@ const TYPES = [
     ],
   },
   {
+    type: 'ha-weather',
+    name: 'Home Assistant weather',
+    ha: true,
+    fields: [
+      { key: 'entity', kind: 'entity', label: 'Weather entity', only: 'weather' },
+      { key: 'temp', kind: 'entity', label: 'Outside temperature sensor (optional)', only: 'sensor' },
+      {
+        key: 'show',
+        kind: 'choice',
+        label: 'Forecast',
+        choices: [
+          ['', 'The next days'],
+          ['hourly', 'The next hours'],
+          ['none', 'None'],
+        ],
+      },
+    ],
+  },
+  {
     type: 'ha-camera',
     name: 'Home Assistant camera',
     ha: true,
@@ -280,6 +299,9 @@ function create(ctx) {
     // Home Assistant cards: {ids} -> their states (kept 20 s); {id} -> switched (lights, switches, fans, scenes, scripts)
     if (u === '/api/cards/ha') return web.json(res, await ha.states(b.ids));
     if (u === '/api/cards/ha/toggle') return web.json(res, await ha.toggle(b.id));
+    // the Home Assistant weather card: {id, temp, kind} -> the condition now and the forecast (kept 15 minutes)
+    if (u === '/api/cards/ha/weather')
+      return web.json(res, await ha.weather(String(b.id || ''), String(b.temp || ''), b.kind === undefined ? 'daily' : String(b.kind)));
     web.notFound(res);
   }
   return { name: 'cards', prefix: '/api/cards/', handle, stop: stopPair };
@@ -305,7 +327,7 @@ function draw(){var box=$('slots');box.innerHTML='';$('sum').textContent=S.slots
  $('raw').value=JSON.stringify(S.cards,null,2)}
 function fields(f,c){f.innerHTML='';var ty=typeOf(c.type);if(!ty)return;ty.fields.forEach(function(fd){var l=el('label',{},fd.label),i;
   if(fd.kind==='choice'){i=el('select',{'data-k':fd.key});fd.choices.forEach(function(ch){i.appendChild(el('option',{value:ch[0]},ch[1]))})}
-  else if(fd.kind==='long'){i=el('textarea',{'data-k':fd.key,rows:4})}else if(fd.kind==='place'){f.appendChild(l);place(f,c);return}else if(fd.kind==='entities'){i=el('textarea',{'data-k':fd.key,rows:5,list:'ents',autocapitalize:'off',spellcheck:'false'})}else if(fd.kind==='entity'){i=el('input',{'data-k':fd.key,type:'text',list:fd.only==='camera'?'cams':'ents',autocomplete:'off',autocapitalize:'off'})}else i=el('input',{'data-k':fd.key,type:'text',autocomplete:'off'});
+  else if(fd.kind==='long'){i=el('textarea',{'data-k':fd.key,rows:4})}else if(fd.kind==='place'){f.appendChild(l);place(f,c);return}else if(fd.kind==='entities'){i=el('textarea',{'data-k':fd.key,rows:5,list:'ents',autocapitalize:'off',spellcheck:'false'})}else if(fd.kind==='entity'){i=el('input',{'data-k':fd.key,type:'text',list:fd.only==='camera'?'cams':fd.only==='weather'?'wxs':fd.only==='sensor'?'sens':'ents',autocomplete:'off',autocapitalize:'off'})}else i=el('input',{'data-k':fd.key,type:'text',autocomplete:'off'});
   i.value=c[fd.key]===undefined?'':String(c[fd.key]);f.appendChild(l);f.appendChild(i)});
  if(ty.ha&&!S.ha)f.insertBefore(el('p',{'class':'m e'},t('Home Assistant is not set up yet: set its address and token in the manager app, More > Home Assistant.')),f.firstChild);
  if(c.type==='template')f.appendChild(el('p',{'class':'h'},t('Use {{greeting}}, {{time}}, {{date}} and {{weekday}} for what changes, and {{weather.temp}} and {{weather.text}} when a weather card is on Home; **bold**, *italic* and a line starting with # for a heading.')))}
@@ -322,7 +344,7 @@ function fromForms(){var out={};[].forEach.call(document.querySelectorAll('secti
  for(var k in S.cards)if(!(k in out)&&!S.slots.some(function(x){return x.id===k}))out[k]=S.cards[k];return out}
 function save(cards){msg(t('Saving…'));api('save',{cards:cards}).then(function(r){if(r.error)return msg(t(r.error),1);S.cards=r.cards||{};draw();msg(t('Saved. Open Home on the TV to see it.'))},function(e){msg(e.error,1)})}
 /* the entities of Home Assistant, offered while typing an entity id */
-function ents(){if(!S.ha)return;api('entities').then(function(j){var a=$('ents'),b=$('cams');a.innerHTML=b.innerHTML='';(j.entities||[]).forEach(function(e){var o=el('option',{value:e.id},e.name);a.appendChild(o);if(/^camera\\./.test(e.id))b.appendChild(o.cloneNode(true))})})}
+function ents(){if(!S.ha)return;api('entities').then(function(j){var a=$('ents'),b=$('cams'),w=$('wxs'),n=$('sens');a.innerHTML=b.innerHTML=w.innerHTML=n.innerHTML='';(j.entities||[]).forEach(function(e){var o=el('option',{value:e.id},e.name);a.appendChild(o);if(/^camera\\./.test(e.id))b.appendChild(o.cloneNode(true));if(/^weather\\./.test(e.id))w.appendChild(o.cloneNode(true));if(/^sensor\\./.test(e.id))n.appendChild(o.cloneNode(true))})})}
 function state(){return api('state').then(function(s){S=s;$('login').className='hide';$('main').className='';draw();ents()})}
 $('save').onclick=function(){save(fromForms())};
 $('rs').onclick=function(){var c;try{c=JSON.parse($('raw').value||'{}')}catch(e){return msg(t('This is not valid JSON.'),1)}save(c)};
@@ -341,7 +363,7 @@ button{text-align:center}button.p{background:#f5f6f8;color:#111;font-weight:600;
 .pl .po{text-align:left;margin:6px 0}#raw{font:13px ui-monospace,Menlo,monospace;min-height:220px}[dir=rtl] body{text-align:right}</style>
 <h1>${T('Cards')}</h1><p id=sum>${T('Connecting to the TV…')}</p>
 <div id=login class=hide><p>${T('Enter the code shown on the TV.')}</p><input id=code inputmode=numeric autocomplete=one-time-code><button class=p id=go>${T('Continue')}</button></div>
-<datalist id=ents></datalist><datalist id=cams></datalist><div id=main class=hide><div id=msg></div><div id=slots></div><button class=p id=save>${T('Save')}</button>
+<datalist id=ents></datalist><datalist id=cams></datalist><datalist id=wxs></datalist><datalist id=sens></datalist><div id=main class=hide><div id=msg></div><div id=slots></div><button class=p id=save>${T('Save')}</button>
 <details><summary>${T('Edit as JSON')}</summary><p class=h>${T('All cards at once, by slot: {"greeting": {"type": "greeting", "name": "Sam"}}. A type the TV does not know yet leaves its slot empty.')}</p>
 <textarea id=raw spellcheck=false autocapitalize=off></textarea><button id=rs>${T('Save JSON')}</button></details></div>
 ` +

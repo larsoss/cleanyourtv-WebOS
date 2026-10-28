@@ -25,6 +25,14 @@ license is in the frida-gum project). Anyone who received this package can ask f
 issue tracker, and we will provide it. The GPL-3.0 text is in `LICENSE-inputhookpp-GPL-3.0.txt`. This applies to
 that library only, not to the rest of this project.
 
+## Scenes and the clock typeface (launcher)
+
+The files `app/scene-*.jpg`, `app/scene-*-fg.webp` and `app/scene-*-glass.jpg` come unchanged from
+[Seagey/couch-tv](https://github.com/Seagey/couch-tv) (MIT), `tv-home/web/backgrounds/`. They were made for that project with an AI
+image model from text only, are not real places, and its `CREDITS.md` releases them for any use. `app/antonio.woff2` is the Antonio
+typeface (Latin, weight 300) by Vernon Adams, under the SIL Open Font License 1.1 (`third-party/antonio/OFL.txt`). The glass clock and
+the scene layout follow couch-tv's design.
+
 ## Voice (optional download)
 
 Nothing below is shipped in the package; the manager app downloads it on request (see the Voice page of the documentation) and

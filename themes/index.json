@@ -23,6 +23,13 @@
    "preview": "compact/preview.jpg"
   },
   {
+   "id": "couchtv",
+   "name": "Couch",
+   "author": "larsoss, after couch-tv",
+   "description": "After couch-tv: five landscapes take turns behind a large glass clock, the scenery in front of the digits, apps on glass at the bottom and frosted glass cards.",
+   "preview": "couchtv/preview.jpg"
+  },
+  {
    "id": "horizon",
    "name": "Horizon",
    "author": "CleanYourTV",

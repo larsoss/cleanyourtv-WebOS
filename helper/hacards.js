@@ -2,7 +2,7 @@
 // long-lived access token already set for Voice (config voice.ha, typed on the voice phone page), so nothing new is stored. The states
 // come from one /api/states request that is kept 20 seconds, however many cards ask.
 //   create({config}) -> { ready(), states(ids) -> [{id, name, state, unit, domain, on}], toggle(id), camera(id) -> {type, body},
-//                         entities() -> [{id, name}] for the phone page }
+//                         entities() -> [{id, name}] for the phone page, weather(id, temp, kind) -> {now, kind, list, at} }
 const fetch = require('./fetch');
 const answers = require('./answers');
 // what OK on a card may switch: things that are on or off, and scenes and scripts that run. Not locks, alarms or covers.
@@ -98,6 +98,67 @@ function create(opts) {
       return null;
     }
   }
+  // ---- the weather card (ha-weather): a weather entity's condition and the forecast, and optionally a sensor for the temperature
+  // outside. The forecast comes from weather.get_forecasts (Home Assistant 2023.9 and newer), kept 15 minutes per entity and kind;
+  // an older Home Assistant that still has the forecast attribute is read from there.
+  const num = (x, d) => (typeof x === 'number' && isFinite(x) ? Math.round(x * Math.pow(10, d || 0)) / Math.pow(10, d || 0) : null);
+  const FC_KINDS = ['daily', 'hourly', 'twice_daily'];
+  let fcCache = {};
+  async function forecast(id, kind, attr) {
+    const k = id + '|' + kind,
+      c = fcCache[k];
+    if (c && Date.now() - c.at < 900000) return c.list;
+    let list = null;
+    try {
+      const r = await call('/api/services/weather/get_forecasts?return_response', 'POST', { entity_id: id, type: kind }, 1 << 20);
+      const j = JSON.parse(r.body.toString('utf8'));
+      const resp = j && j.service_response ? j.service_response : j;
+      if (resp && resp[id] && Array.isArray(resp[id].forecast)) list = resp[id].forecast;
+    } catch (_) {}
+    if (!list && Array.isArray(attr)) list = attr; // Home Assistant before 2024.3
+    list = (list || []).slice(0, 8).map(f => ({
+      t: String(f.datetime || '').slice(0, 30),
+      cond: String(f.condition || '').slice(0, 30),
+      hi: num(f.temperature),
+      lo: num(f.templow),
+      rain: num(f.precipitation_probability),
+    }));
+    if (Object.keys(fcCache).length > 20) fcCache = {};
+    fcCache[k] = { at: Date.now(), list };
+    return list;
+  }
+  async function weather(id, temp, kind) {
+    if (!ready()) return { error: 'Home Assistant is not set up' };
+    if (typeof id !== 'string' || !/^weather\.[\w]{1,120}$/.test(id)) return { error: 'Choose a weather entity from your phone' };
+    if (typeof temp !== 'string' || !ID.test(temp)) temp = '';
+    if (FC_KINDS.indexOf(kind) < 0 && kind !== 'none') kind = 'daily';
+    try {
+      const by = {};
+      for (const e of await list()) by[e.entity_id] = e;
+      const w = by[id];
+      if (!w) return { error: 'not available' };
+      const a = w.attributes || {},
+        s = temp && by[temp],
+        sTemp = s ? parseFloat(s.state) : NaN;
+      const out = {
+        now: {
+          cond: String(w.state || '').slice(0, 30),
+          temp: isFinite(sTemp) ? Math.round(sTemp * 10) / 10 : num(a.temperature),
+          unit: String((s && isFinite(sTemp) && (s.attributes || {}).unit_of_measurement) || a.temperature_unit || '°C').slice(0, 6),
+          hum: num(a.humidity),
+          wind: num(a.wind_speed),
+          windUnit: String(a.wind_speed_unit || '').slice(0, 8),
+          name: String(a.friendly_name || id).slice(0, 60),
+        },
+        kind,
+        list: kind === 'none' ? [] : await forecast(id, kind, a.forecast),
+        at: Date.now(),
+      };
+      return out;
+    } catch (e) {
+      return { error: String(e.message || e) };
+    }
+  }
   async function entities() {
     if (!ready()) return [];
     return (await list())
@@ -106,7 +167,7 @@ function create(opts) {
       .slice(0, 2000)
       .map(e => ({ id: e.id, name: e.name }));
   }
-  return { ready, states, toggle, camera, entities };
+  return { ready, states, toggle, camera, entities, weather };
 }
 
 module.exports = { create, TOGGLE, RUN };

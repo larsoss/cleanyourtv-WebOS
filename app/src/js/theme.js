@@ -15,7 +15,7 @@ var TH0 = {
   },
   TH = TH0,
   themeKeys = [],
-  themeAttrs = ['data-bar', 'data-labels', 'data-clock', 'data-grid', 'data-galign'];
+  themeAttrs = ['data-bar', 'data-labels', 'data-clock', 'data-grid', 'data-galign', 'data-cstyle', 'data-cards'];
 function applyTheme(t) {
   var st = document.documentElement.style,
     b = document.body,
@@ -26,6 +26,7 @@ function applyTheme(t) {
   b.classList.remove('grid-open');
   if (!t || !t.vars) {
     TH = TH0;
+    if (window.SCENES) SCENES.apply(null);
     return;
   }
   for (k in t.vars) {
@@ -74,6 +75,8 @@ function applyTheme(t) {
   var sh = $('shelf');
   sh.style.paddingLeft = '';
   sh.style.paddingRight = '';
+  /* scenes and the glass clock (scenes.js) */
+  if (window.SCENES) SCENES.apply(t);
 }
 
 /* line the app name up with the left edge of the dock (shelf.dockAlign). The dock is centred on a width that depends on how many apps

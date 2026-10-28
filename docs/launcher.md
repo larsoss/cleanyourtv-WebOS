@@ -77,6 +77,7 @@ same place.
 | Home Assistant entity | One entity with an icon, its state (On, Off, 8.4 °C) and its name. Select it with the remote (it joins the row of top buttons) and press OK to switch a light, switch, fan or automation, or to run a scene or script. Locks, alarms and covers are never switched from the TV. |
 | Home Assistant entities | A list of entities, one per line on the phone page, with an optional title. |
 | Home Assistant camera | A camera's picture, renewed every 10, 30 or 60 seconds while Home is shown. |
+| Home Assistant weather | A `weather.*` entity: the sky now with an icon, the temperature (from an outside temperature sensor if you choose one, otherwise the entity's own), humidity and wind, and the forecast for the next days or hours from `weather.get_forecasts` (Home Assistant 2023.9 and newer; older versions are read from the `forecast` attribute). Asked every five minutes, the forecast at most every 15 minutes. It also feeds `{{weather.temp}}`, `{{weather.text}}` and the greeting's weather line. |
 | Text | Your own text. `{{greeting}}`, `{{time}}`, `{{date}}` and `{{weekday}}` are filled in and kept up to date, and `{{weather.temp}}` and `{{weather.text}}` with a weather card on Home; `**bold**`, `*italic*` and a line starting with `#` for a heading. In three sizes. |
 
 Names, texts and the other options are typed on your phone: **Cards** > **Set up from your phone** in the manager app shows a QR
@@ -86,6 +87,9 @@ the TV. The Home Assistant cards use the address and the long-lived access token
 **Home Assistant** > **Set up from your phone**, the same ones [Voice](voice.md) uses. Without them a Home Assistant card says that
 Home Assistant is not set up; the TV asks Home Assistant for the states every 30 seconds while Home is shown. The phone page
 offers your entities while you type.
+
+In a theme with `cards.style` glass (**Couch**) the weather and Home Assistant cards sit on frosted glass: a blurred copy of the
+scene behind them, lined up with the screen, so the TV does not have to blur anything live.
 
 Cards dim after three minutes without a key press and shift by a few pixels every few minutes, so nothing stays in one place on an
 OLED panel for hours. How a theme marks its places is in [Themes](themes.md#slots-for-cards).

@@ -131,12 +131,40 @@ run(async () => {
           { entity_id: 'light.living', state: 'on', attributes: { friendly_name: 'Living room' } },
           { entity_id: 'sensor.temp', state: '8.4', attributes: { friendly_name: 'Outside', unit_of_measurement: '°C' } },
           { entity_id: 'lock.door', state: 'locked', attributes: {} },
+          {
+            entity_id: 'weather.home',
+            state: 'rainy',
+            attributes: {
+              friendly_name: 'Home',
+              temperature: 9,
+              temperature_unit: '°C',
+              humidity: 81,
+              wind_speed: 14.2,
+              wind_speed_unit: 'km/h',
+            },
+          },
         ])
       );
     }
     if (rq.url === '/api/camera_proxy/camera.door') {
       rs.writeHead(200, { 'content-type': 'image/jpeg' });
       return rs.end(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]));
+    }
+    if (rq.url === '/api/services/weather/get_forecasts?return_response') {
+      rs.writeHead(200, { 'content-type': 'application/json' });
+      return rs.end(
+        JSON.stringify({
+          changed_states: [],
+          service_response: {
+            'weather.home': {
+              forecast: [
+                { datetime: '2026-10-29T11:00:00+00:00', condition: 'rainy', temperature: 11.4, templow: 4, precipitation_probability: 70 },
+                { datetime: '2026-10-30T11:00:00+00:00', condition: 'sunny', temperature: 10, templow: 3.2 },
+              ],
+            },
+          },
+        })
+      );
     }
     if (/^\/api\/services\//.test(rq.url)) {
       rs.writeHead(200, { 'content-type': 'application/json' });
@@ -176,7 +204,30 @@ run(async () => {
   const r4 = await call(cards, '/api/cards/ha/camera/light.living');
   ok(r.code === 200 && r4.code === 404, "a camera's picture is passed on, and only for camera entities");
   p = await phone('GET', '/api/entities', undefined, code);
-  ok(p.j.entities.length === 3 && p.j.entities[0].id === 'light.living', 'the phone page lists the entities to choose from');
+  ok(p.j.entities.length === 4 && p.j.entities[0].id === 'light.living', 'the phone page lists the entities to choose from');
+  // the Home Assistant weather card: the condition, the temperature from a sensor when one is chosen, and the forecast
+  r = await call(cards, '/api/cards/ha/weather', 'POST', { id: 'weather.home', temp: 'sensor.temp', kind: 'daily' });
+  ok(
+    r.j.now.cond === 'rainy' &&
+      r.j.now.temp === 8.4 &&
+      r.j.now.hum === 81 &&
+      r.j.now.wind === 14 &&
+      r.j.list.length === 2 &&
+      r.j.list[0].hi === 11 &&
+      r.j.list[0].rain === 70 &&
+      r.j.list[1].rain === null &&
+      calls.some(c => /POST \/api\/services\/weather\/get_forecasts\?return_response/.test(c)),
+    'the weather card reads the condition, the outside sensor and the forecast from weather.get_forecasts'
+  );
+  const nf = calls.filter(c => /get_forecasts/.test(c)).length;
+  r = await call(cards, '/api/cards/ha/weather', 'POST', { id: 'weather.home', kind: 'daily' });
+  ok(
+    r.j.now.temp === 9 && calls.filter(c => /get_forecasts/.test(c)).length === nf,
+    "without a sensor the entity's own temperature; the forecast is kept"
+  );
+  r = await call(cards, '/api/cards/ha/weather', 'POST', { id: 'sensor.temp' });
+  const r5 = await call(cards, '/api/cards/ha/weather', 'POST', { id: 'weather.home', kind: 'none' });
+  ok(!!r.j.error && r5.j.list.length === 0, 'only a weather entity, and no forecast when none is wanted');
   has.server.close();
   await call(cards, '/api/cards/pair', 'POST', { stop: true });
   await sleep(50);

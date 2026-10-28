@@ -879,3 +879,328 @@ body.wpon {
   opacity: 0.45;
   transition: opacity 2s linear;
 }
+/* the Home Assistant weather card: now on the left, the forecast in columns on the right */
+.card-ha-weather {
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+.hw-now {
+  flex: none;
+  min-width: 250px;
+  text-align: start;
+}
+.hw-top {
+  display: flex;
+  align-items: center;
+}
+.hw-t {
+  font-size: calc(76px * var(--fs));
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hw-c {
+  margin-top: 10px;
+  font-size: calc(26px * var(--fs));
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hw-f,
+.hw-msg {
+  margin-top: 4px;
+  font-size: calc(22px * var(--fs));
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
+.hw-fc {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin-left: 28px;
+  padding-left: 24px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+.hw-fc > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 84px;
+  font-size: calc(22px * var(--fs));
+}
+.hw-fc > div + div {
+  margin-left: 10px;
+}
+.hw-d {
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+.hw-fc svg {
+  width: 38px;
+  height: 38px;
+  margin: 8px 0;
+}
+.hw-fc b {
+  font-weight: 600;
+}
+.hw-fc small {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.62);
+}
+.hw-fc i {
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 0.82em;
+  color: #9fd3ff;
+}
+/* ---------- scenes and the glass clock (scenes.js; after couch-tv, MIT). Layers: photo, shade, glass clock, the scenery cut out of
+   the photo, the late-evening dimming; then the rest of Home. Only opacity is animated. ---------- */
+@font-face {
+  font-family: "CYTV Clock";
+  font-weight: 300;
+  font-display: block;
+  src: url(antonio.woff2) format("woff2");
+}
+#scenes,
+#gsolo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  pointer-events: none;
+}
+body.scenes-on {
+  background-image: none;
+}
+/* the scenes take the place of the theme's wallpaper and of Wallpapers */
+.scenes-on .wp,
+.scenes-on .wpd {
+  display: none;
+}
+.scene {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  display: none;
+  opacity: 0;
+  transition: opacity calc(1.6s * var(--spd)) ease-in-out;
+  will-change: opacity;
+}
+.scene.ready {
+  display: block;
+}
+.scene.on {
+  opacity: 1;
+}
+.scene .sbg,
+.scene .fg,
+.scene .shade,
+.scene .late {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+}
+.scene .sbg,
+.scene .fg {
+  object-fit: cover;
+}
+/* after 10 pm the scene dims a little (an overlay, no filter) */
+.scene .late {
+  background: #000;
+  opacity: 0;
+  transition: opacity 2s linear;
+}
+.late .scene .late {
+  opacity: 0.28;
+}
+.gclock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 150px;
+  text-align: center;
+  white-space: nowrap;
+  font-family: "CYTV Clock", "Arial Narrow", sans-serif;
+  font-weight: 300;
+  font-size: 400px;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+}
+.gclock .fill {
+  display: block;
+  padding: 0.2em 0;
+  margin: -0.2em 0;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-size: 1920px 1080px;
+  background-repeat: no-repeat;
+}
+.gclock .rim,
+.gclock .sheen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+.gclock .rim {
+  color: rgba(255, 255, 255, 0.1);
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.55);
+}
+.gclock .sheen {
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-image: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0) 70%,
+    rgba(255, 255, 255, 0.22) 100%
+  );
+}
+/* without scenes: a white frosted fill */
+#gsolo .gclock .fill {
+  background-image: linear-gradient(170deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12));
+}
+/* the scenes, as in couch-tv: Night pink glass behind the peak */
+.s-night .gclock .fill {
+  filter: brightness(1.15) saturate(1.2);
+  opacity: 0.9;
+}
+.s-night .gclock .rim {
+  color: rgba(255, 200, 215, 0.06);
+  -webkit-text-stroke-color: rgba(255, 215, 225, 0.5);
+}
+/* Golden hour: a little smaller, low enough for the volcano's tip to rise into the digits */
+.s-golden .gclock {
+  top: 152px;
+  font-size: 390px;
+}
+/* Waterline: the clock on the water; under the line a soft reflection */
+.s-water .shade {
+  background: linear-gradient(180deg, rgba(0, 12, 24, 0.42) 0%, rgba(0, 12, 24, 0.12) 40%, rgba(0, 0, 0, 0) 52%, rgba(0, 20, 40, 0.5) 100%);
+}
+.s-water .gclock {
+  top: 268px;
+  font-size: 420px;
+}
+.s-water .gclock.under {
+  opacity: 0.7;
+  transform: translateX(5px);
+}
+.s-water .gclock.under .rim {
+  -webkit-text-stroke-color: rgba(170, 240, 255, 0.5);
+}
+/* Fog: a big dark clock on the left, sinking into the misty hills */
+.s-fog .gclock {
+  left: 96px;
+  right: auto;
+  top: 172px;
+  font-size: 470px;
+  text-align: left;
+}
+.s-fog .gclock .fill {
+  filter: brightness(0.46) saturate(0.8) contrast(1.1);
+  opacity: 0.8;
+}
+.s-fog .gclock .rim {
+  color: transparent;
+  -webkit-text-stroke-color: rgba(255, 255, 255, 0.6);
+}
+.s-fog .gclock .sheen {
+  display: none;
+}
+/* Dawn: warm light at the top, the clock low enough for the ridges to cross it */
+.s-dawn .shade {
+  background: linear-gradient(180deg, rgba(50, 28, 12, 0.42) 0%, rgba(50, 28, 12, 0) 55%);
+}
+.s-dawn .gclock {
+  top: 230px;
+}
+/* with the glass clock the text clock steps aside: only the date stays, centred above the glass clock (each scene places it) */
+[data-cstyle="glass"] #time,
+[data-cstyle="glass"] #greet {
+  display: none;
+}
+[data-cstyle="glass"] #clock {
+  left: 0;
+  right: 0;
+  top: 96px;
+  bottom: auto;
+  transform: none;
+  justify-content: center;
+  height: auto;
+}
+[data-cstyle="glass"] #date {
+  margin: 0;
+  padding: 0;
+  font-size: calc(34px * var(--date-s));
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  transition: opacity calc(0.6s * var(--spd)) ease-in-out;
+}
+[data-cstyle="glass"].scene-night #date {
+  color: rgba(255, 232, 238, 0.92);
+}
+[data-cstyle="glass"].scene-golden #clock {
+  top: 106px;
+}
+[data-cstyle="glass"].scene-water #clock {
+  top: 216px;
+}
+[data-cstyle="glass"].scene-dawn #clock {
+  top: 176px;
+}
+[data-cstyle="glass"].scene-fog #clock {
+  left: 104px;
+  right: auto;
+  top: 116px;
+  justify-content: flex-start;
+}
+[data-cstyle="glass"].scene-fog #date {
+  color: #16201d;
+  text-shadow: none;
+}
+/* the light misty sky of Fog: the top buttons turn dark so they stay visible */
+.scenes-on.scene-fog .pill:not(.f) {
+  background: rgba(22, 32, 29, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(22, 32, 29, 0.28);
+  color: #16201d;
+}
+/* glass cards (cards.style): scenes.js puts the blurred scene behind each one; this is the frame, and the panel without scenes */
+[data-cards="glass"] .card-weather,
+[data-cards="glass"] .card-ha-weather,
+[data-cards="glass"] .card-ha-entity,
+[data-cards="glass"] .card-ha-entities,
+[data-cards="glass"] .card-ha-camera {
+  padding: 22px 28px;
+  border-radius: 30px;
+  background-color: rgba(30, 20, 28, 0.34);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 220, 230, 0.2),
+    inset 0 1px 0 rgba(255, 230, 238, 0.22),
+    0 24px 60px rgba(0, 0, 0, 0.28);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.22);
+  color: #fff;
+}
+[data-cards="glass"] .card-ha-camera {
+  padding: 0;
+}
+[data-cards="glass"] .card-ha-entity.f {
+  background-image: none !important;
+  background-color: var(--acc);
+  color: var(--acc-ink);
+  text-shadow: none;
+}

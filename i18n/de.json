@@ -684,5 +684,18 @@
  "Uninstall %s?": "%s deinstallieren?",
  "Uninstalling %s...": "%s wird deinstalliert...",
  "%s uninstalled.": "%s deinstalliert.",
- "Could not uninstall %s.": "%s konnte nicht deinstalliert werden."
+ "Could not uninstall %s.": "%s konnte nicht deinstalliert werden.",
+ "Sunny": "Sonnig",
+ "Heavy rain": "Starkregen",
+ "Sleet": "Schneeregen",
+ "Hail": "Hagel",
+ "Windy": "Windig",
+ "Exceptional weather": "Ungewöhnliches Wetter",
+ "Home Assistant weather": "Home Assistant-Wetter",
+ "Choose a weather entity from your phone": "Wähle eine Wetter-Entität auf dem Handy",
+ "Weather entity": "Wetter-Entität",
+ "Outside temperature sensor (optional)": "Sensor Außentemperatur (optional)",
+ "Forecast": "Vorhersage",
+ "The next days": "Die nächsten Tage",
+ "The next hours": "Die nächsten Stunden"
 }
