@@ -14,6 +14,7 @@ var SCENES = (function () {
     { id: 'dawn', fg: true },
   ];
   var box = null,
+    frost = null,
     solo = null,
     els = [],
     cur = 0,
@@ -50,6 +51,10 @@ var SCENES = (function () {
       return el;
     });
     document.body.insertBefore(box, document.body.firstChild);
+    /* frosted glass behind the app grid (cards.style glass): the blurred scene instead of the dark layer */
+    frost = document.createElement('div');
+    frost.id = 'sglass';
+    document.body.insertBefore(frost, $('view'));
   }
   function fillOf(s) {
     return s ? 'url("scene-' + s.id + '-glass.jpg")' : '';
@@ -177,6 +182,7 @@ var SCENES = (function () {
     if (!cards) return;
     var els2 = cards.children,
       g = cardsGlass() && on ? fillOf(LIB[cur]) : '';
+    if (frost) frost.style.backgroundImage = g ? 'linear-gradient(rgba(16,14,26,0.34),rgba(16,14,26,0.46)),' + g : '';
     for (var i = 0; i < els2.length; i++) {
       var el = els2[i];
       if (!/\bcard-(weather|ha-)/.test(el.className)) continue;
