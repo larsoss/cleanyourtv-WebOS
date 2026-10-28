@@ -3343,7 +3343,13 @@ var CARD_TYPES = {
         hawNum(w.now.temp) +
         unit +
         '</span></div><div class="hw-c"></div><div class="hw-f"></div></div>';
-      var list = (w.list || []).slice(0, w.kind === 'hourly' ? 6 : 5);
+      /* the daily forecast starts tomorrow: today is the left half of the card */
+      var today = new Date().toDateString(),
+        list = (w.list || [])
+          .filter(function (f) {
+            return w.kind !== 'daily' || new Date(f.t).toDateString() !== today;
+          })
+          .slice(0, w.kind === 'hourly' ? 6 : 5);
       if (list.length) {
         h +=
           '<div class="hw-fc">' +
