@@ -114,6 +114,34 @@ run(async () => {
     couch.attrs.cstyle === 'glass' && couch.attrs.cards === 'glass' && couch.scenes.set === 'couch' && couch.scenes.secs === 10,
     'the glass clock, the scenes (seconds clamped to 10 or more) and glass cards reach the launcher'
   );
+  ok(!('seasonal' in couch.scenes), 'the seasonal photos are off unless the theme asks for them');
+  const seasonal = themeMod.resolve(themeMod.normalize({ effects: { scenes: 'couch', seasonal: 'on' } }, 'seasonal'));
+  const seasonalCustom = themeMod.resolve(themeMod.normalize({ effects: { scenes: 'off', seasonal: 'on' } }, 'seasonal-off'));
+  ok(
+    seasonal.scenes.seasonal === true && !seasonalCustom.scenes,
+    'effects.seasonal reaches the launcher with the couch scenes, and alone it turns nothing on'
+  );
+  // which photos a day gets (scenes.js seasonOf): the holidays first, then the season
+  const sj = fs.readFileSync(path.join(root, 'app', 'src', 'js', 'scenes.js'), 'utf8');
+  const seasonOf = new Function(sj.slice(sj.indexOf('function seasonOf'), sj.indexOf('function seasonalLib')) + 'return seasonOf;')();
+  const on = (m, d) => seasonOf(new Date(2026, m - 1, d));
+  ok(
+    on(12, 5) === 'autumn' &&
+      on(12, 6) === 'christmas' &&
+      on(12, 27) === 'christmas' &&
+      on(12, 28) === 'newyear' &&
+      on(1, 1) === 'newyear' &&
+      on(1, 3) === 'winter' &&
+      on(3, 19) === 'winter' &&
+      on(3, 20) === 'spring' &&
+      on(6, 21) === 'summer' &&
+      on(9, 22) === 'summer' &&
+      on(9, 23) === 'autumn' &&
+      on(11, 3) === 'autumn',
+    'Christmas from 6 to 27 December, New Year until 2 January, then the seasons'
+  );
+  const ids = (sj.match(/p: '(\d{10,13}-[0-9a-f]{12})'/g) || []).length;
+  ok(ids === 30, 'six sets of five photos, each an Unsplash photo id: ' + ids);
   const odd = themeMod.resolve(themeMod.normalize({ clock: { style: 'neon' }, effects: { scenes: 'beach' } }, 'odd'));
   ok(
     !('cstyle' in plain.attrs) && !('cards' in plain.attrs) && !('scenes' in plain) && !('cstyle' in odd.attrs) && !('scenes' in odd),

@@ -944,5 +944,6 @@
  "User name": "User name",
  "Password": "Password",
  "Sign in": "Sign in",
- "Sign out": "Sign out"
+ "Sign out": "Sign out",
+ "Photo: %s / Unsplash": "Photo: %s / Unsplash"
 }

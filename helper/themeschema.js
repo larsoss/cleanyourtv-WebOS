@@ -224,6 +224,13 @@ const SCHEMA = [
   ],
   ['effects.sceneSecs', 'int', [10, 600], 20, 'Seconds each scene stays (`effects.scenes`).'],
   [
+    'effects.seasonal',
+    'enum',
+    ['off', 'on'],
+    'off',
+    'With `effects.scenes` `couch`: `on` adds photos for the time of year, loaded from Unsplash when shown (nothing is stored on the TV): Christmas lights from 6 to 27 December and fireworks until 2 January in place of the landscapes, and in winter, spring, summer and autumn five photos of the season between the five landscapes.',
+  ],
+  [
     'cards.style',
     'enum',
     ['flat', 'glass'],
@@ -570,6 +577,7 @@ function resolve(t, accent) {
   if (dockBottom) out.dockBottom = true;
   if (v['effects.scenes'] !== 'off') {
     out.scenes = { set: v['effects.scenes'], secs: v['effects.sceneSecs'] };
+    if (v['effects.scenes'] === 'couch' && v['effects.seasonal'] === 'on') out.scenes.seasonal = true;
     if (v['effects.scenes'] === 'custom' && v.customScenes) {
       out.scenes.lib = v.customScenes;
       out.scenes.id = t.id;

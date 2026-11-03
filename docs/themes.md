@@ -243,6 +243,7 @@ when the focus moves down into it (Back or Up closes it); a dock at the top leav
 | `effects.wallpaperDim` | 0 to 0.9 | `0.4` | How far the wallpaper is darkened with the background colour. |
 | `effects.scenes` | `off`, `couch`, `custom` | `off` | `couch`: five landscapes shipped with the launcher take turns behind Home (Night, Golden hour, Waterline, Fog, Dawn); with `clock.style` glass the scenery stands in front of the clock. Takes the place of the wallpaper and of Wallpapers. `custom`: the theme brings its own scenes as a `"scenes"` array in `theme.json`. |
 | `effects.sceneSecs` | 10 to 600 | `20` | Seconds each scene stays (`effects.scenes`). |
+| `effects.seasonal` | `off`, `on` | `off` | With `effects.scenes` `couch`: `on` adds photos for the time of year, loaded from Unsplash when shown (nothing is stored on the TV): Christmas lights from 6 to 27 December and fireworks until 2 January in place of the landscapes, and in winter, spring, summer and autumn five photos of the season between the five landscapes. |
 | **cards** | | | |
 | `cards.style` | `flat`, `glass` | `flat` | `glass`: the weather and Home Assistant cards sit on frosted glass (a blurred copy of the scene behind them, no live blur). |
 <!-- schema:end -->
@@ -258,6 +259,15 @@ in Waterline the clock sits on the water with a reflection under it. Each scene 
 10 pm the scenes dim a little. Everything is drawn once a minute; only opacity animates. The scenes and the clock come from
 [couch-tv](https://github.com/Seagey/couch-tv) (MIT; the scenes were generated for that project and are free to use, the typeface is
 Antonio under the SIL Open Font License, see `THIRD-PARTY.md`).
+
+`effects.seasonal` `on` follows the calendar. From 6 to 27 December the scenes are five photos of Christmas lights and snowy
+villages, from 28 December to 2 January five photos of fireworks; the rest of the year the five photos of the season (winter from
+21 December, spring from 20 March, summer from 21 June, autumn from 23 September) take turns with the five landscapes. The photos are
+from [Unsplash](https://unsplash.com) (free to use under the Unsplash License); the TV loads each one from Unsplash's image host,
+1920 x 1080, when it is shown (with a blurred copy for the glass), keeps nothing on its storage, and shows the photographer in the
+bottom corner. A photo that does not load is skipped; when none loads (no network), the five landscapes return for half an hour.
+The photos have no cut-out, so the clock sits in front of them, with a darker shade at the top. The list is in `app/src/js/scenes.js`
+(`SEASONAL`).
 
 `effects.scenes` `custom` lets a theme bring its own landscape images instead of the five built-in ones. Add a `"scenes"` array to
 `theme.json` and put the image files in the theme folder:
