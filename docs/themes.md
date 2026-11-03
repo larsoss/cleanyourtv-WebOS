@@ -262,7 +262,10 @@ Antonio under the SIL Open Font License, see `THIRD-PARTY.md`).
 
 `effects.seasonal` `on` follows the calendar, in place of the five landscapes. From 6 to 27 December the scenes are five photos of
 Christmas lights and snowy villages, from 28 December to 2 January five photos of fireworks; the rest of the year five photos of the
-season (winter from 21 December, spring from 20 March, summer from 21 June, autumn from 23 September). The photos are from
+season (winter from 21 December, spring from 20 March, summer from 21 June, autumn from 23 September). The TV's country setting
+(else the region of its language) counts: south of the equator (Australia, New Zealand, South Africa, Argentina, Chile, Brazil, ...)
+the seasons are the other way round, while Christmas and New Year stay; spring shows three tulip fields more only in the Netherlands
+and Belgium. The photos are from
 [Unsplash](https://unsplash.com) (free to use under the Unsplash License), and the photographer shows in the bottom corner. The first
 two of each set ship with the launcher (`app/season-<set>-<n>.jpg` with a blurred `-glass.jpg`, about 5 MB for all twelve), so they
 always show; the other three are loaded from Unsplash's image host, 1920 x 1080, when they are shown, are never stored on the TV, and

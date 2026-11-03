@@ -17,10 +17,52 @@ var SCENES = (function () {
   ];
   /* Seasonal scenes (effects.seasonal, with the couch set): photos from Unsplash (free to use under the Unsplash License) in place of
      the five landscapes. Christmas (6 to 27 December), New Year (28 December to 2 January) and the seasons (winter from 21 December,
-     spring from 20 March, summer from 21 June, autumn from 23 September) each have five. The first two of each set ship with the
+     spring from 20 March, summer from 21 June, autumn from 23 September) each have five (spring three, and three tulip fields more in the Netherlands and Belgium). The first two of each set ship with the
      launcher (app/season-<set>-<n>.jpg and -glass.jpg), so they always show; the other three are loaded from Unsplash's image host
      when they are shown and never stored on the TV, and skipped without network. p: the photo on images.unsplash.com, by: the
      photographer (shown in the corner), dark: a bright sky, so the top buttons turn dark. */
+  /* where the TV is (its country setting, else the region of its locale): a photo with cc shows only in those countries, and south
+     of the equator the seasons are the other way round (summer from 21 December; Christmas and New Year stay) */
+  var TULIPS = ['NL', 'NLD', 'BE', 'BEL'],
+    SOUTH = [
+      'AU',
+      'AUS',
+      'NZ',
+      'NZL',
+      'ZA',
+      'ZAF',
+      'AR',
+      'ARG',
+      'CL',
+      'CHL',
+      'UY',
+      'URY',
+      'PY',
+      'PRY',
+      'BR',
+      'BRA',
+      'NA',
+      'NAM',
+      'BW',
+      'BWA',
+      'LS',
+      'LSO',
+      'SZ',
+      'SWZ',
+    ];
+  function region() {
+    var c = '';
+    try {
+      var w = window.webOSSystem && window.webOSSystem.country ? window.webOSSystem : window.PalmSystem;
+      var j = w && w.country ? (typeof w.country === 'string' ? JSON.parse(w.country) : w.country) : null;
+      c = (j && (j.smartServiceCountry || j.country)) || '';
+    } catch (e) {}
+    if (!c) {
+      var m = /[-_]([A-Za-z]{2,3})$/.exec((window.webOSSystem && window.webOSSystem.locale) || navigator.language || '');
+      c = m ? m[1] : '';
+    }
+    return String(c).toUpperCase();
+  }
   var SEASONAL = {
     christmas: [
       { p: '1765883915553-cac1513d8712', by: 'Eugene' },
@@ -44,11 +86,13 @@ var SCENES = (function () {
       { p: '1607427045913-9a3a67be4616', by: 'Daniele Franchi', dark: true },
     ],
     spring: [
-      { p: '1771353527238-fe6beed69a8b', by: 'Ken Theimer' },
       { p: '1506260408121-e353d10b87c7', by: 'Claudio Testa' },
-      { p: '1775027814804-2a25db2fc615', by: 'Chris Weiher', dark: true },
       { p: '1683806743160-2fc2e159dc66', by: 'Pascal Debrunner', dark: true },
-      { p: '1554199150-22eb3cfe888d', by: 'Lisette Verwoerd', dark: true },
+      { p: '1462524500090-89443873e2b4', by: 'Anders Jildén', dark: true },
+      /* tulip fields: in the Netherlands and Belgium */
+      { p: '1771353527238-fe6beed69a8b', by: 'Ken Theimer', cc: TULIPS },
+      { p: '1775027814804-2a25db2fc615', by: 'Chris Weiher', dark: true, cc: TULIPS },
+      { p: '1554199150-22eb3cfe888d', by: 'Lisette Verwoerd', dark: true, cc: TULIPS },
     ],
     summer: [
       { p: '1683041133891-613b76cbebc7', by: 'Sergei Gussev' },
@@ -68,27 +112,28 @@ var SCENES = (function () {
   var PHOTO = '?w=1920&h=1080&fit=crop&q=80&fm=jpg',
     PHOTO_GLASS = '?w=960&h=540&fit=crop&q=60&fm=jpg&blur=120&bri=15';
   /* which photos a day gets: a holiday, else the season */
-  function seasonOf(d) {
+  function seasonOf(d, south) {
     var md = (d.getMonth() + 1) * 100 + d.getDate();
     if (md >= 1206 && md <= 1227) return 'christmas';
     if (md >= 1228 || md <= 102) return 'newyear';
-    if (md >= 1221 || md <= 319) return 'winter';
-    if (md <= 620) return 'spring';
-    if (md <= 922) return 'summer';
-    return 'autumn';
+    var k = md >= 1221 || md <= 319 ? 0 : md <= 620 ? 1 : md <= 922 ? 2 : 3;
+    return ['winter', 'spring', 'summer', 'autumn'][south ? (k + 2) % 4 : k];
   }
   var SHIPPED = 2; /* the first photos of each set that ship with the launcher */
-  function seasonalLib(key) {
-    return SEASONAL[key].map(function (x, i) {
+  function seasonalLib(key, cc) {
+    var out = [];
+    SEASONAL[key].forEach(function (x, i) {
+      if (x.cc && x.cc.indexOf(cc) < 0) return;
       var id = key + '-' + (i + 1);
-      return {
+      out.push({
         id: id,
         url: i < SHIPPED ? 'season-' + id : 'https://images.unsplash.com/photo-' + x.p,
         local: i < SHIPPED,
         by: x.by,
         darkSky: !!x.dark,
-      };
+      });
     });
+    return out;
   }
   var season = '' /* the photos in use (seasonOf), '' without effects.seasonal */,
     lastTh = null;
@@ -283,8 +328,9 @@ var SCENES = (function () {
 
     /* rebuild the scene list when switching mode or theme */
     var newCustom = wantCustom;
-    season = wantCouch && th.scenes.seasonal ? seasonOf(new Date()) : '';
-    var newLib = wantCustom ? th.scenes.lib : season ? seasonalLib(season) : COUCH;
+    var cc = region();
+    season = wantCouch && th.scenes.seasonal ? seasonOf(new Date(), SOUTH.indexOf(cc) >= 0) : '';
+    var newLib = wantCustom ? th.scenes.lib : season ? seasonalLib(season, cc) : COUCH;
     var libChanged =
       newCustom !== custom ||
       newLib.length !== lib.length ||
@@ -334,7 +380,7 @@ var SCENES = (function () {
     var h = new Date().getHours();
     /* a new season or holiday: the photos change with it; once an hour a photo that did not load (no network) is tried again */
     if (on && season) {
-      if (seasonOf(new Date()) !== season) apply(lastTh);
+      if (seasonOf(new Date(), SOUTH.indexOf(region()) >= 0) !== season) apply(lastTh);
       else if (new Date().getMinutes() === 0)
         lib.forEach(function (x) {
           x.bad = false;

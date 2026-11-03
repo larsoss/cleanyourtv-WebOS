@@ -124,7 +124,7 @@ run(async () => {
   // which photos a day gets (scenes.js seasonOf): the holidays first, then the season
   const sj = fs.readFileSync(path.join(root, 'app', 'src', 'js', 'scenes.js'), 'utf8');
   const seasonOf = new Function(sj.slice(sj.indexOf('function seasonOf'), sj.indexOf('function seasonalLib')) + 'return seasonOf;')();
-  const on = (m, d) => seasonOf(new Date(2026, m - 1, d));
+  const on = (m, d, south) => seasonOf(new Date(2026, m - 1, d), south);
   ok(
     on(12, 5) === 'autumn' &&
       on(12, 6) === 'christmas' &&
@@ -140,8 +140,27 @@ run(async () => {
       on(11, 3) === 'autumn',
     'Christmas from 6 to 27 December, New Year until 2 January, then the seasons'
   );
+  ok(
+    on(1, 15, true) === 'summer' && on(7, 1, true) === 'winter' && on(4, 1, true) === 'autumn' && on(12, 24, true) === 'christmas',
+    'south of the equator the seasons turn around, Christmas stays'
+  );
   const ids = (sj.match(/p: '(\d{10,13}-[0-9a-f]{12})'/g) || []).length;
-  ok(ids === 30, 'six sets of five photos, each an Unsplash photo id: ' + ids);
+  ok(ids === 31, 'six sets of photos, each an Unsplash photo id: ' + ids);
+  // which photos a country gets (scenes.js seasonalLib): the tulip fields only in the Netherlands and Belgium
+  const libSrc = sj.slice(sj.indexOf('var TULIPS'), sj.indexOf('var season ='));
+  const L = new Function('window', 'navigator', libSrc + 'return { seasonalLib: seasonalLib, region: region };')(
+    { webOSSystem: { country: '{"country":"NLD","smartServiceCountry":"NLD"}' } },
+    {}
+  );
+  ok(L.region() === 'NLD', "the TV's country setting is read: " + L.region());
+  ok(
+    L.seasonalLib('spring', 'NLD').length === 6 && L.seasonalLib('spring', 'US').length === 3 && L.seasonalLib('autumn', 'US').length === 5,
+    'tulips in spring only in the Netherlands and Belgium; the other sets everywhere'
+  );
+  ok(
+    L.seasonalLib('spring', 'US').every((x, i) => i < 2 === x.local) && L.seasonalLib('spring', 'US')[0].url === 'season-spring-1',
+    'the two photos that ship with the launcher are shown everywhere'
+  );
   const shipped = [];
   ['christmas', 'newyear', 'winter', 'spring', 'summer', 'autumn'].forEach(k =>
     [1, 2].forEach(n => ['', '-glass'].forEach(g => shipped.push('season-' + k + '-' + n + g + '.jpg')))
