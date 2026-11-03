@@ -45,7 +45,7 @@
           "label": "How many",
           "default": "auto",
           "choices": [
-            ["auto", "As many as fit (4 stills, 6 posters)"],
+            ["auto", "As many as fit at a readable size"],
             ["2", "2"],
             ["3", "3"],
             ["4", "4"],

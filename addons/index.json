@@ -59,14 +59,14 @@
         "luna"
       ],
       "files": {
-        "addon.json": "0eda0dcf322a7a57c0371d528a5f10b0c4c96e7c726e4839cdc234395adc0089",
-        "cards/continue/card.css": "142844d7901bf8627f30f73053d1df98ab8f8b21bc92e623f19b5f922fee3176",
+        "addon.json": "46c4c4f785042586eab9bf04b46c9588a243008eb9a7f9c474af364c88b2f176",
+        "cards/continue/card.css": "9a8b10b593ce4fd0be69d32e80387c40c3e1de1bc02cf8ebf6f0acf02c95870f",
         "cards/continue/card.html": "625e062837cbda14fc3d37f7c716adeaed0ef65ca0b2c87346ee03bbc7213f8d",
-        "cards/continue/card.js": "987762f94bf11e61d13cf88927af184b2444cf95684e0025a991c65015bc2887",
-        "cards/continue/preview.jpg": "f540c0011b0bf1edcc50e3c3fe9deeedaa8e226b65f7d076c4196561e8a222ee",
+        "cards/continue/card.js": "c47e03ef37a8465299b9fbc0ab8bf773eec9710d30512f124129aa7eb4cd5d45",
+        "cards/continue/preview.jpg": "0575d5a7e720efbef47efdbe8ee323c7a5490a51f313d3ca15347383760201a0",
         "jellyfin.js": "65511aad779fe149625e5f2805fa14be35a2cb60c06fff5a4d0a8b5ea786684b",
         "phone.js": "2746902ef82be054d1fee24d8e34b9a0c99e732332ca1e2c2de08cddbe2b8f2a",
-        "service.js": "df95078f8673e769c2c9d5be01caded448151b23c3c50f22d20a8600e6ae48fd"
+        "service.js": "d3e56e2263ae2b7447428ca09b45d894d5b7c0f207cab5153cceb777ac1e6213"
       }
     },
     {

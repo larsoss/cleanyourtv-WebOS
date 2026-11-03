@@ -1256,7 +1256,8 @@ body.scenes-on {
 [data-cards="glass"] .card-ha-weather,
 [data-cards="glass"] .card-ha-entity,
 [data-cards="glass"] .card-ha-entities,
-[data-cards="glass"] .card-ha-camera {
+[data-cards="glass"] .card-ha-camera,
+[data-cards="glass"] .card-frame {
   padding: 22px 28px;
   border-radius: 30px;
   background-color: rgba(30, 20, 28, 0.34);
@@ -1269,6 +1270,13 @@ body.scenes-on {
 }
 [data-cards="glass"] .card-ha-camera {
   padding: 0;
+}
+/* a card with its own page on glass: the page inside the margins of the panel (cards.js moves the targets of its buttons along) */
+[data-cards="glass"] .card-frame > iframe {
+  left: 18px !important;
+  top: 16px !important;
+  width: calc(100% - 36px) !important;
+  height: calc(100% - 32px) !important;
 }
 [data-cards="glass"] .card-ha-entity.f {
   background-image: none !important;
@@ -3539,6 +3547,17 @@ function cardButtons(el, list) {
     };
     ok.push({ name: n.name, label: el._pk.actions[i].label, x: q(n.x), y: q(n.y), w: q(n.w), h: q(n.h) });
   });
+  /* the page says percent of its frame; the frame can sit inside the card's margins (glass cards), so the targets are moved there */
+  var f = el._f,
+    cw = el.offsetWidth,
+    ch = el.offsetHeight;
+  if (f && cw && ch && f.offsetWidth && (f.offsetLeft || f.offsetTop || f.offsetWidth !== cw || f.offsetHeight !== ch))
+    ok.forEach(function (b) {
+      b.x = ((f.offsetLeft + (b.x * f.offsetWidth) / 100) / cw) * 100;
+      b.y = ((f.offsetTop + (b.y * f.offsetHeight) / 100) / ch) * 100;
+      b.w = ((b.w * f.offsetWidth) / 100 / cw) * 100;
+      b.h = ((b.h * f.offsetHeight) / 100 / ch) * 100;
+    });
   var key = JSON.stringify(ok);
   if (el._bk === key) return;
   el._bk = key;
@@ -3604,6 +3623,8 @@ function cardFrame(id, pk) {
   return {
     draw: function (el, o) {
       el._pk = pk;
+      /* a card with its own page: the glass style (cards.style) gives it the frosted panel too, its page inside the margins */
+      if (!/\bcard-frame\b/.test(el.className)) el.className += ' card-frame';
       if (!el._f) {
         var f = document.createElement('iframe');
         f.setAttribute('sandbox', 'allow-scripts');
@@ -3976,7 +3997,7 @@ var SCENES = (function () {
     if (frost) frost.style.backgroundImage = g ? 'linear-gradient(rgba(16,14,26,0.34),rgba(16,14,26,0.46)),' + g : '';
     for (var i = 0; i < els2.length; i++) {
       var el = els2[i];
-      if (!/\bcard-(weather|ha-)/.test(el.className)) continue;
+      if (!/\bcard-(weather|ha-|frame\b)/.test(el.className)) continue;
       if (!g) {
         el.style.backgroundImage = '';
         el.style.backgroundSize = '';

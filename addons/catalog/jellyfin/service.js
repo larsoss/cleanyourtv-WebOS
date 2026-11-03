@@ -29,7 +29,7 @@ function create(ctx) {
   const style = opt => (opt && opt.style === 'poster' ? 'poster' : 'wide');
   const count = opt => {
     const n = parseInt(opt && opt.count, 10);
-    return n >= 2 && n <= 6 ? n : style(opt) === 'poster' ? 6 : 4;
+    return n >= 1 && n <= 6 ? n : 0;
   };
   // pictures already made into data: addresses, by image and tag (a picture changes only with its tag)
   let pics = {},
@@ -60,7 +60,7 @@ function create(ctx) {
       };
     let items;
     try {
-      items = await jf.list(count(opt), !opt || opt.nextup !== 'off');
+      items = await jf.list(count(opt) || (style(opt) === 'poster' ? 6 : 4), !opt || opt.nextup !== 'off');
     } catch (e) {
       return { connected: true, error: T(String(e.message || e)), items: [], at: Date.now() };
     }
@@ -80,7 +80,7 @@ function create(ctx) {
         pic: p,
       });
     }
-    return { connected: true, style: st, items: out, empty: out.length ? '' : T('Nothing to continue'), at: Date.now() };
+    return { connected: true, style: st, count: count(opt), items: out, empty: out.length ? '' : T('Nothing to continue'), at: Date.now() };
   }
 
   // the app that opens: the one chosen, or the first of the three that is installed (asked of LG's app manager, kept 10 minutes)
