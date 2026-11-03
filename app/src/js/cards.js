@@ -699,7 +699,7 @@ function cardButtons(el, list) {
 /* OK on a button: the add-on gets the action, then the card is asked for its data again (the answer to a button shows within seconds) */
 function cardBtnAct(d) {
   var el = d._btn.card;
-  api('/api/cards/action', { slot: el._slot, name: d._btn.name }).then(
+  api('/api/cards/action', { slot: el._slot, name: d._btn.name, lang: LANG }).then(
     function (r) {
       if (r && r.error) toast(t(r.error), true);
       [400, 1500, 3500].forEach(function (ms) {
@@ -718,7 +718,7 @@ function cardFeed(el) {
   if (!el._pk || !el.parentNode || el._busy) return;
   el._busy = true;
   el._feedAt = Date.now();
-  api('/api/cards/feed', { slot: el._slot }).then(
+  api('/api/cards/feed', { slot: el._slot, lang: LANG }).then(
     function (r) {
       el._busy = false;
       el._data = r && typeof r === 'object' ? r : { error: 'no answer' };

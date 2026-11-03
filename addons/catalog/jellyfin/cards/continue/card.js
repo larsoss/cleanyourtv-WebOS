@@ -19,7 +19,7 @@ function layout(have, poster, chosen) {
     H = window.innerHeight,
     ratio = poster ? 2 / 3 : 16 / 9,
     gap = Math.max(8, Math.round(H * 0.07)),
-    minW = H * (poster ? 0.5 : 1.25),
+    minW = H * (poster ? 0.55 : 1.4),
     n = chosen ? Math.min(have, chosen) : Math.max(1, Math.min(have, Math.floor((W + gap) / (minW + gap)))),
     h = H,
     w = h * ratio;
@@ -27,7 +27,7 @@ function layout(have, poster, chosen) {
     w = (W - (n - 1) * gap) / n;
     h = Math.min(H, w / ratio);
   }
-  var rem = Math.max(11, Math.min(28, Math.min(h * 0.13, w * (poster ? 0.12 : 0.075))));
+  var rem = Math.max(12, Math.min(34, Math.min(h * 0.17, w * (poster ? 0.15 : 0.095))));
   return { n: n, w: Math.floor(w), h: Math.floor(h), gap: gap, rem: rem, top: Math.floor((H - h) / 2) };
 }
 function draw() {
@@ -65,8 +65,9 @@ function draw() {
     }
     tile.appendChild(el('div', 'fade'));
     txt.appendChild(el('div', 't', it.title));
-    var sub = it.left ? it.sub + (it.sub ? ' · ' : '') + it.left : it.sub;
-    if (sub) txt.appendChild(el('div', 's', sub));
+    if (it.sub) txt.appendChild(el('div', 's', it.sub));
+    /* how long is left (or "Next episode"): a small glass label in the top corner */
+    if (it.left) tile.appendChild(el('div', 'left', it.left));
     tile.appendChild(txt);
     if (it.pct > 0) {
       var bar = el('div', 'bar'),

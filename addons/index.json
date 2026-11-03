@@ -60,10 +60,10 @@
       ],
       "files": {
         "addon.json": "46c4c4f785042586eab9bf04b46c9588a243008eb9a7f9c474af364c88b2f176",
-        "cards/continue/card.css": "9a8b10b593ce4fd0be69d32e80387c40c3e1de1bc02cf8ebf6f0acf02c95870f",
+        "cards/continue/card.css": "4fa91cf45225cb62e120295378dc72bcd6f4ee9442ee7f2059fb17ccdb636841",
         "cards/continue/card.html": "625e062837cbda14fc3d37f7c716adeaed0ef65ca0b2c87346ee03bbc7213f8d",
-        "cards/continue/card.js": "c47e03ef37a8465299b9fbc0ab8bf773eec9710d30512f124129aa7eb4cd5d45",
-        "cards/continue/preview.jpg": "0575d5a7e720efbef47efdbe8ee323c7a5490a51f313d3ca15347383760201a0",
+        "cards/continue/card.js": "070f228981684091b7da9f9c25af638321f100c53ba1b5bb6263f757a7d22942",
+        "cards/continue/preview.jpg": "0ac03a4a4243c4534eddbfee7a7ae1996491f5036b663d690044e2f769446009",
         "jellyfin.js": "65511aad779fe149625e5f2805fa14be35a2cb60c06fff5a4d0a8b5ea786684b",
         "phone.js": "2746902ef82be054d1fee24d8e34b9a0c99e732332ca1e2c2de08cddbe2b8f2a",
         "service.js": "d3e56e2263ae2b7447428ca09b45d894d5b7c0f207cab5153cceb777ac1e6213"

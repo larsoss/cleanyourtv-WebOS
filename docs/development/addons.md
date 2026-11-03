@@ -2,7 +2,7 @@
 
 An add-on is a feature that is loaded, installed and removed on its own. Live TV and the Android box are bundled add-ons: they ship in the package (`helper/addons-bundled/iptv/` and
 `helper/addons-bundled/androidbox/`) and still answer their old paths (`/api/live/...`, `/api/androidbox...`), so the launcher and the
-manager did not change for them. A bundled add-on gets the service's own ctx as well as its add-on fields. Every add-on, bundled or not, also gets `util` (`lanIp`, `randomInt`, `mkdirp`, `i18n`) and `env` (`lang()`, `wallpaperSize()`). Other add-ons come from a catalog in this repository and are installed from the manager (**Add-ons**).
+manager did not change for them. A bundled add-on gets the service's own ctx as well as its add-on fields. Every add-on, bundled or not, also gets `util` (`lanIp`, `randomInt`, `mkdirp`, `i18n`) and `env` (`lang()`: the Language setting, or while that follows the TV the language Home is shown in, as the launcher says with the requests of the cards; `wallpaperSize()`). Other add-ons come from a catalog in this repository and are installed from the manager (**Add-ons**).
 
 What is done, and what is not:
 
