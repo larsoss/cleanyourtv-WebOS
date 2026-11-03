@@ -169,6 +169,8 @@ run(async () => {
     settings,
   });
 
+  const man = require(path.join(addonDir, 'addon.json'));
+  ok(man.about.length <= 600 && man.cards[0].about.length <= 600, 'the texts of the manager fit (600 characters), so none is cut off');
   const J = require(path.join(addonDir, 'jellyfin.js'));
   ok(
     J.base('jellyfin.local:8096/web/#/home') === 'http://jellyfin.local:8096' &&
