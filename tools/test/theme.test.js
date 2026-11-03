@@ -142,6 +142,15 @@ run(async () => {
   );
   const ids = (sj.match(/p: '(\d{10,13}-[0-9a-f]{12})'/g) || []).length;
   ok(ids === 30, 'six sets of five photos, each an Unsplash photo id: ' + ids);
+  const shipped = [];
+  ['christmas', 'newyear', 'winter', 'spring', 'summer', 'autumn'].forEach(k =>
+    [1, 2].forEach(n => ['', '-glass'].forEach(g => shipped.push('season-' + k + '-' + n + g + '.jpg')))
+  );
+  const missing = shipped.filter(f => !fs.existsSync(path.join(root, 'app', f)));
+  ok(
+    !missing.length,
+    'the first two photos of each set ship with the launcher, with their glass: ' + (missing.join(' ') || 'all 24 files')
+  );
   const odd = themeMod.resolve(themeMod.normalize({ clock: { style: 'neon' }, effects: { scenes: 'beach' } }, 'odd'));
   ok(
     !('cstyle' in plain.attrs) && !('cards' in plain.attrs) && !('scenes' in plain) && !('cstyle' in odd.attrs) && !('scenes' in odd),

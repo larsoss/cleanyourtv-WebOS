@@ -228,7 +228,7 @@ const SCHEMA = [
     'enum',
     ['off', 'on'],
     'off',
-    'With `effects.scenes` `couch`: `on` adds photos for the time of year, loaded from Unsplash when shown (nothing is stored on the TV): Christmas lights from 6 to 27 December and fireworks until 2 January in place of the landscapes, and in winter, spring, summer and autumn five photos of the season between the five landscapes.',
+    'With `effects.scenes` `couch`: `on` shows photos for the time of year in place of the five landscapes: Christmas lights from 6 to 27 December, fireworks until 2 January, then five photos of the season (winter, spring, summer, autumn). Two of each set ship with the launcher; the other three are loaded from Unsplash when shown.',
   ],
   [
     'cards.style',

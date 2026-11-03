@@ -15,12 +15,12 @@ var SCENES = (function () {
     { id: 'fog', fg: true },
     { id: 'dawn', fg: true },
   ];
-  /* Seasonal scenes (effects.seasonal, with the couch set): photos from Unsplash (free to use under the Unsplash License), loaded
-     from Unsplash's image host when they are shown and never stored on the TV. Christmas (6 to 27 December) and New Year (28 December
-     to 2 January) show only their own photos; in a season (winter from 21 December, spring from 20 March, summer from 21 June, autumn
-     from 23 September) its five photos take turns with the five landscapes. p: the photo on images.unsplash.com, by: the photographer
-     (shown in the corner), dark: a bright sky, so the top buttons turn dark. Without network a photo is skipped; when none loads the
-     five landscapes come back for half an hour. */
+  /* Seasonal scenes (effects.seasonal, with the couch set): photos from Unsplash (free to use under the Unsplash License) in place of
+     the five landscapes. Christmas (6 to 27 December), New Year (28 December to 2 January) and the seasons (winter from 21 December,
+     spring from 20 March, summer from 21 June, autumn from 23 September) each have five. The first two of each set ship with the
+     launcher (app/season-<set>-<n>.jpg and -glass.jpg), so they always show; the other three are loaded from Unsplash's image host
+     when they are shown and never stored on the TV, and skipped without network. p: the photo on images.unsplash.com, by: the
+     photographer (shown in the corner), dark: a bright sky, so the top buttons turn dark. */
   var SEASONAL = {
     christmas: [
       { p: '1765883915553-cac1513d8712', by: 'Eugene' },
@@ -37,8 +37,8 @@ var SCENES = (function () {
       { p: '1605941407951-fa62495beb54', by: 'Jireh' },
     ],
     winter: [
-      { p: '1518873890627-d4b177c06e51', by: 'Joel & Jasmin Førestbird', dark: true },
       { p: '1778510093540-0da0986f7d95', by: 'Timo Wielink' },
+      { p: '1518873890627-d4b177c06e51', by: 'Joel & Jasmin Førestbird', dark: true },
       { p: '1514969655361-1dbc3731d4cc', by: 'Berny Steiner' },
       { p: '1573314316983-8f4cd223ed2f', by: 'Daniele Franchi', dark: true },
       { p: '1607427045913-9a3a67be4616', by: 'Daniele Franchi', dark: true },
@@ -52,9 +52,9 @@ var SCENES = (function () {
     ],
     summer: [
       { p: '1683041133891-613b76cbebc7', by: 'Sergei Gussev' },
+      { p: '1490682143684-14369e18dce8', by: 'Artem Sapegin' },
       { p: '1720760637240-45bc41fe31ec', by: 'Anton Sobotyak' },
       { p: '1705747894563-f47ca490bca4', by: 'Tahamie Farooqui', dark: true },
-      { p: '1490682143684-14369e18dce8', by: 'Artem Sapegin' },
       { p: '1759434236990-3ce36b930edf', by: 'Daniel Seßler' },
     ],
     autumn: [
@@ -77,21 +77,20 @@ var SCENES = (function () {
     if (md <= 922) return 'summer';
     return 'autumn';
   }
+  var SHIPPED = 2; /* the first photos of each set that ship with the launcher */
   function seasonalLib(key) {
-    var photos = SEASONAL[key].map(function (x, i) {
-      return { id: key + '-' + (i + 1), url: 'https://images.unsplash.com/photo-' + x.p, by: x.by, darkSky: !!x.dark };
+    return SEASONAL[key].map(function (x, i) {
+      var id = key + '-' + (i + 1);
+      return {
+        id: id,
+        url: i < SHIPPED ? 'season-' + id : 'https://images.unsplash.com/photo-' + x.p,
+        local: i < SHIPPED,
+        by: x.by,
+        darkSky: !!x.dark,
+      };
     });
-    if (key === 'christmas' || key === 'newyear') return photos;
-    /* a landscape, a photo of the season, a landscape ... */
-    var out = [];
-    for (var i = 0; i < Math.max(COUCH.length, photos.length); i++) {
-      if (COUCH[i]) out.push(COUCH[i]);
-      if (photos[i]) out.push(photos[i]);
-    }
-    return out;
   }
   var season = '' /* the photos in use (seasonOf), '' without effects.seasonal */,
-    offlineAt = 0 /* when no seasonal photo could load: the landscapes until half an hour later */,
     lastTh = null;
   var lib = COUCH /* active scene list */,
     custom = false /* whether lib comes from the theme */,
@@ -150,7 +149,7 @@ var SCENES = (function () {
   }
   function fillOf(s) {
     if (!s) return '';
-    if (s.url) return 'url("' + s.url + PHOTO_GLASS + '")';
+    if (s.url) return 'url("' + s.url + (s.local ? '-glass.jpg' : PHOTO_GLASS) + '")';
     if (custom) return 'url("' + customBase + s.glass + '")';
     return 'url("scene-' + s.id + '-glass.jpg")';
   }
@@ -187,22 +186,13 @@ var SCENES = (function () {
     if (!el.classList.contains('ready')) {
       if (s.url) {
         var im = el.querySelector('.sbg');
-        /* no network, or the photo is gone: skip it; when none of the photos loads, the landscapes for a while */
+        /* no network, or the photo is gone: it is skipped (the shipped photos always show) */
         im.onerror = function () {
+          if (s.local) return;
           s.bad = true;
-          if (
-            lib.every(function (x) {
-              return x.bad || !x.url;
-            }) &&
-            lib.every(function (x) {
-              return x.url;
-            })
-          ) {
-            offlineAt = Date.now();
-            if (lastTh) apply(lastTh);
-          } else if (lib[cur] === s) show(nextOk(cur));
+          if (lib[cur] === s) show(nextOk(cur));
         };
-        im.src = s.url + PHOTO;
+        im.src = s.url + (s.local ? '.jpg' : PHOTO);
         setCssVars(el, s);
       } else if (custom) {
         el.querySelector('.sbg').src = customBase + s.image;
@@ -293,8 +283,7 @@ var SCENES = (function () {
 
     /* rebuild the scene list when switching mode or theme */
     var newCustom = wantCustom;
-    if (offlineAt && Date.now() - offlineAt > 1800000) offlineAt = 0;
-    season = wantCouch && th.scenes.seasonal && !offlineAt ? seasonOf(new Date()) : '';
+    season = wantCouch && th.scenes.seasonal ? seasonOf(new Date()) : '';
     var newLib = wantCustom ? th.scenes.lib : season ? seasonalLib(season) : COUCH;
     var libChanged =
       newCustom !== custom ||
@@ -343,10 +332,13 @@ var SCENES = (function () {
   /* the clock tick: the digits only change once a minute */
   function tick() {
     var h = new Date().getHours();
-    /* a new season or holiday (or the network back after a while): the photos change with it */
-    if (on && lastTh && lastTh.scenes && lastTh.scenes.seasonal) {
-      if (offlineAt && Date.now() - offlineAt > 1800000) apply(lastTh);
-      else if (season && seasonOf(new Date()) !== season) apply(lastTh);
+    /* a new season or holiday: the photos change with it; once an hour a photo that did not load (no network) is tried again */
+    if (on && season) {
+      if (seasonOf(new Date()) !== season) apply(lastTh);
+      else if (new Date().getMinutes() === 0)
+        lib.forEach(function (x) {
+          x.bad = false;
+        });
     }
     document.body.classList.toggle('late', h >= 22 || h < 6);
     if (!glassOn()) return;
