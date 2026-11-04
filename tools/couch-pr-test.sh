@@ -34,13 +34,10 @@ box) # the black box: lines and their spacing, size, and the reason line of the 
   tail -n 2 $L/blackbox.log | cut -c1-200
   echo "last boot: $(head -n 1 $L/blackbox.last.log)" ;;
 fill) # the 64 KB cap: the box is filled to 70 KB; the next line must bring it back below 64 KB
-  head -c 71680 /dev/zero | tr '\0' 'x' | fold -w 99 >> $L/blackbox.log; echo "filled: $(wc -c < $L/blackbox.log)" ;;
-cost) # what top costs every 30 seconds
-  a=$(cut -d' ' -f1 /proc/uptime)
-  for i in 1 2 3 4 5; do top -b -n 1 >/dev/null 2>&1; done
-  b=$(cut -d' ' -f1 /proc/uptime)
-  t=$(awk -v a=$a -v b=$b 'BEGIN{printf "%.3f", (b-a)/5}')
-  echo "top -b -n 1: $t s per run (wall time, 5 runs), $(awk -v t=$t 'BEGIN{printf "%.2f", t/30*100}')% of one core at one run per 30 s"
+  i=0; while [ $i -lt 720 ]; do echo "0.00 fill xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; i=$((i + 1)); done >> $L/blackbox.log
+  echo "filled: $(wc -c < $L/blackbox.log)" ;;
+cost) # what top costs every 30 seconds: the CPU time of 10 runs (utime + stime of the children, in clock ticks of 1/100 s)
+  sh -c 'for i in 1 2 3 4 5 6 7 8 9 10; do top -b -n 1 >/dev/null 2>&1; done; cat /proc/$$/stat' | awk '{t=$16+$17; printf "top -b -n 1: %.3f s CPU per run, %.2f%% of one core at one run per 30 s\n", t/1000, t/1000/30*100}'
   echo "load now: $(cut -d' ' -f1-3 /proc/loadavg)" ;;
 disable) touch $L/DISABLE; echo "DISABLE set" ;;
 enable) rm -f $L/DISABLE; echo "DISABLE removed" ;;
@@ -72,5 +69,34 @@ seasons) # the add-on: what it keeps, and what the launcher gets
   api localhost:8765/api/addons/seasons/status; echo
   api -X POST localhost:8765/api/scenes -d '{"cc":"NLD"}' | cut -c1-300; echo
   du -sh $L/addon-data/seasons 2>/dev/null ;;
-*) echo "phases: boot <n> | home | mark | marked | unmark | box | fill | cost | disable | enable | lg | rollback | sharelog | icon | iconreset | seasons" ;;
+preflight) # before a reboot or an install: the Homebrew Channel's failsafe flag must be gone (a reboot before that starts in failsafe mode)
+  echo "uptime: $(up)"
+  if [ -e /var/luna/preferences/webosbrew_failsafe ]; then echo "STOP: webosbrew_failsafe is still there; wait until it is gone"; else echo "failsafe flag: gone"; fi
+  echo "update block: $([ -e /var/luna/preferences/webosbrew_block_updates ] && echo on || echo OFF)"
+  echo "source: $(cat $L/source 2>/dev/null)" ;;
+standby) # after the remote's power key off and on: the power states, and what the stand-in and the watchdog did
+  grep -h NL_POWER_STATE /var/log/messages 2>/dev/null | tail -n 6 | sed 's/.*NL_POWER_STATE //' | cut -c1-120
+  grep -E "app manager restarted|nothing on screen|without its stand-in|LG's Home until" /tmp/cleanyourtv-boot.log | tail -n 6
+  echo "sam since: $(awk '{print $22/100}' /proc/$(pgrep -x sam | head -n 1)/stat 2>/dev/null) s"
+  echo "stand-in running: $(pgrep -f '^/bin/sh /usr/bin/com.webos.app.home' | head -n 1)"
+  luna-send -n 1 -w 3000 -f luna://com.webos.applicationManager/getForegroundAppInfo '{}' </dev/null | grep appId ;;
+repos) # pull request 169: the shell tool, Lars' repository added (it asks first), what it offers
+  node $L/cytv-addons.js shortcut
+  api -X POST localhost:8765/api/addons/repos -d '{"add":"larsoss/cleanyourtv-WebOS@tv-addons"}'; echo "  (without confirm: must be refused)"
+  node $L/cytv-addons.js repo-add larsoss/cleanyourtv-WebOS@tv-addons -y
+  node $L/cytv-addons.js repos
+  node $L/cytv-addons.js list ;;
+repoinstall) # Seasons from Lars' repository (it replaces the copy from the official catalog), and where it came from
+  node $L/cytv-addons.js install seasons larsoss-cleanyourtv-webos -y
+  node $L/cytv-addons.js installed
+  cat $L/addons/.sources/seasons.json 2>/dev/null || find $L -path '*addons/.sources/seasons.json' -exec cat {} \;; echo ;;
+repoupdate) # after a newer Seasons was pushed to the repository: update takes it from there
+  node $L/cytv-addons.js update -y
+  node $L/cytv-addons.js installed | grep seasons ;;
+repophone) # the phone page for adding a repository: port 8799 opens with a code and closes again
+  api -X POST localhost:8765/api/addons/repos/phone -d '{}' | sed 's/"code":"[0-9]*"/"code":"(hidden)"/'; echo
+  echo "port 8799 listening: $(netstat -ltn 2>/dev/null | grep -c ':8799 ')"
+  api -X POST localhost:8765/api/addons/repos/phone -d '{"stop":true}'; echo
+  sleep 1; echo "port 8799 after stop: $(netstat -ltn 2>/dev/null | grep -c ':8799 ')" ;;
+*) echo "phases: preflight | standby | repos | repoinstall | repoupdate | repophone | boot <n> | home | mark | marked | unmark | box | fill | cost | disable | enable | lg | rollback | sharelog | icon | iconreset | seasons" ;;
 esac
