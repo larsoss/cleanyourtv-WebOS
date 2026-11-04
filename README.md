@@ -9,6 +9,10 @@
 
 # CleanYourTV for LG webOS
 
+> **This is the Couch edition** (larsoss/cleanyourtv-WebOS): the upstream development branch as it is,
+> with this edition's installer. Install it on a TV that already runs CleanYourTV with `tools/install-couch.sh`; the steps from a
+> Windows PC are in [INSTALL-WINDOWS.md](INSTALL-WINDOWS.md) (Dutch). Everything below is the original project's README.
+
 A fast home screen for rooted LG webOS TVs, with Live TV from your own playlist, an Inputs list on the Input key,
 picture notifications, optional on-device voice recognition and an optional debloat of LG's ads and telemetry.
 
