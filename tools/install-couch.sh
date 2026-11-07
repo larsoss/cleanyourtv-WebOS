@@ -96,6 +96,8 @@ fp() { cat "$@" | md5sum | cut -c1-12; }
 cp $S/scripts/bootstrap.sh $SVC/bootstrap.sh
 mkdir -p $SVC/helper $SVC/scripts $SVC/i18n $SVC/payload/app
 cp $S/helper/*.js $SVC/helper/
+# the QR code generator an add-on's page loads as /addon/qrcode.js (helper/addons.js: beside the helper files, as the package puts it)
+[ -f $S/third-party/qrcode-generator/qrcode.js ] && cp $S/third-party/qrcode-generator/qrcode.js $SVC/helper/qrcode.js
 # the folders the service has besides its files (add-ons that ship with it, the pictures of the cards), as the package has them:
 # without the sources of an add-on's page (src)
 for f in $(cd $S/helper && ls -d */ 2>/dev/null); do
