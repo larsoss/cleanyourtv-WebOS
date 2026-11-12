@@ -95,6 +95,17 @@ run(async () => {
     /\.card-frame > iframe,\s*\[data-cards="glass"\] \.card-frame > \.card-bw/.test(css),
     'on glass the wrapper has the same inset as the frame'
   );
+  {
+    // the frame box is moved up by half its height (translateY(-50%) in CARD_FRAME_BOX): on glass its top is the middle of the panel, so
+    // the page sits 16px inside the top and the bottom, not half its height above the panel
+    const rule = (css.match(/\[data-cards="glass"\] \.card-frame > iframe,[^{]*\{([^}]*)\}/) || [])[1] || '';
+    ok(
+      /translateY\(-50%\)/.test(csrc.slice(csrc.indexOf('var CARD_FRAME_BOX'))) &&
+        /top:\s*50% !important/.test(rule) &&
+        /height:\s*calc\(100% - 32px\) !important/.test(rule),
+      'on glass the page of a card is centred in the panel (top 50% with the frame box translateY(-50%)), inside its margins'
+    );
+  }
   // a 30px card with the frame box of 44px: the stored percentages are the page's own
   const sty = [];
   vm.runInNewContext(cb + ';cardButtons(el, [{name:"a",x:10,y:20,w:30,h:100}]);', {
