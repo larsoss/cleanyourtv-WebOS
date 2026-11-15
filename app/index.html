@@ -1289,14 +1289,14 @@ body.scenes-on {
 .scene .fg {
   object-fit: cover;
 }
-/* after 10 pm the scene dims a little (an overlay, no filter) */
+/* while the sun is down the scene dims a little, so the same photo reads as the hour it is (an overlay, no filter: daynight.js) */
 .scene .late {
   background: #000;
   opacity: 0;
   transition: opacity 2s linear;
 }
 .late .scene .late {
-  opacity: 0.28;
+  opacity: var(--night-dim, 0.28);
 }
 .gclock {
   position: absolute;
@@ -2982,6 +2982,53 @@ function paint(d, col) {
   d.style.setProperty('--c', col.c.join(','));
   d.style.setProperty('--b', col.b.join(','));
 }
+/* ---------- Day or night, for the scenes behind Home (scenes.js) ----------
+   The scenes dimmed from 10 pm by the clock alone, so in December the sun was long down while the photo still stood in full daylight,
+   and in June the dimming came on while it was still light outside. The same photo should simply look like the hour it is.
+   What is asked, in this order, and why: the weather of the place the user picked for a weather card already says whether the sun is up
+   there (Open-Meteo's is_day); it costs nothing and is already on the TV. Without it, the sun is worked out from that place's
+   coordinates, which needs no network. Without a place, the clock decides, as it did before. A TV that knows nothing new therefore keeps
+   exactly its old behaviour.
+   Only function declarations here, so the file can be read in a test without a browser (as colour.js is). */
+
+/* The hours the sun rises and sets, in hours of local time on that date, for a place; null above the polar circles on a day without a
+   sunrise or a sunset, and for coordinates that are not a place. The hours are of that date and can fall outside 0 to 24 when the place
+   is far from the TV's own time zone (a weather card for another part of the world), so read them around the clock. The usual
+   astronomy: the day of the year gives the sun's declination
+   and the equation of time, the latitude gives the hour angle of the horizon. It is a few minutes out at most, which is enough to dim a
+   photograph by. */
+function sunHours(date, lat, lon) {
+  if (!isFinite(lat) || !isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+  var rad = Math.PI / 180;
+  var start = Date.UTC(date.getFullYear(), 0, 0);
+  var day = Math.floor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - start) / 86400000);
+  var g = (357.5291 + 0.98560028 * (day - 1)) * rad; /* the sun's mean anomaly */
+  var l = 280.459 * rad + g + 1.915 * rad * Math.sin(g) + 0.02 * rad * Math.sin(2 * g); /* its place along the ecliptic */
+  var dec = Math.asin(Math.sin(23.44 * rad) * Math.sin(l)); /* declination */
+  /* the equation of time, in hours: the difference between the clock's sun and the real one */
+  var eot = (-7.655 * Math.sin(g) + 9.873 * Math.sin(2 * l + 3.588 * rad)) / 60;
+  var cos = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec)) / (Math.cos(lat * rad) * Math.cos(dec));
+  if (cos > 1 || cos < -1) return null; /* the sun does not cross the horizon on this date */
+  var half = Math.acos(cos) / rad / 15; /* half the day, in hours */
+  var noon = 12 - lon / 15 - eot + -date.getTimezoneOffset() / 60; /* the sun at its highest, in the TV's own time */
+  return { rise: noon - half, set: noon + half };
+}
+
+/* Is it night now? o: {date, weatherDay (true, false or null: what the weather says), lat, lon (the place of the weather card, or
+   nothing)}. The clock's own rule (dark from 10 pm to 6 am) is the last word, so this never answers nothing. */
+function nightNow(o) {
+  var date = (o && o.date) || new Date();
+  if (o && (o.weatherDay === true || o.weatherDay === false)) return !o.weatherDay;
+  var sun = o && sunHours(date, +o.lat, +o.lon);
+  if (sun) {
+    var hour = date.getHours() + date.getMinutes() / 60;
+    var rise = ((sun.rise % 24) + 24) % 24,
+      set = ((sun.set % 24) + 24) % 24; /* read around the clock: a place far from this time zone can rise or set past midnight */
+    return rise <= set ? hour < rise || hour >= set : hour >= set && hour < rise;
+  }
+  var h = date.getHours();
+  return h >= 22 || h < 6;
+}
 /* ---------- tiles (built once per app, reused across rebuilds) ---------- */
 function tile(a) {
   /* a new custom icon (iv, the App icons add-on) or a new way to show it (it: Full tile): build the tile again, with the colour of the new picture */
@@ -3445,6 +3492,13 @@ function wthSvg(k) {
 }
 function wthText(w) {
   return w && w.now ? w.now.temp + '° · ' + wthKind(w.now.code, w.now.day)[1] : '';
+}
+/* the place of a weather card (the first one that was asked for), for the sun's hours in daynight.js: {lat, lon} or null */
+function wxPlace() {
+  var k = Object.keys(WX)[0];
+  if (!k) return null;
+  var p = k.split(',');
+  return isFinite(+p[0]) && isFinite(+p[1]) ? { lat: +p[0], lon: +p[1] } : null;
 }
 /* the weather of a card's place: what is known now (or null), asking the service when it is older than ten minutes */
 function wthFor(o) {
@@ -4896,6 +4950,8 @@ function csFind(type, q) {
    Without scenes the glass clock stands alone with a white frosted fill.
    Custom scenes (effects.scenes "custom"): a theme brings its own images; they are served by the helper at /api/theme/scene/<id>/<file>.
    Per-scene clock and date position are set as CSS variables on each scene element; .s-custom in home.css reads them.
+   The same photo stands in daylight or in the dark: body.late is set while the sun is down (daynight.js), so the scene dims from
+   sunset instead of from 10 pm by the clock.
    Scenes of an add-on (with the couch scenes): an add-on that provides "scenes" (the Seasons add-on, helper/scenes.js) can bring other
    photos for the couch scenes. The launcher asks POST /api/scenes {cc} (the TV's country) when the theme starts the couch scenes and
    every 30 minutes; a list comes back only when such an add-on runs, and then its photos take the place of the five landscapes, drawn
@@ -4908,7 +4964,8 @@ var SCENES = (function () {
     { id: 'fog', fg: true },
     { id: 'dawn', fg: true },
   ];
-  var addonLib = null /* the scenes of an add-on, as custom scenes, or null */,
+  var wasDark = null /* whether the sun was down the last time the clock ticked */,
+    addonLib = null /* the scenes of an add-on, as custom scenes, or null */,
     addonKey = '',
     addonAt = 0,
     lastTh = null;
@@ -5175,8 +5232,18 @@ var SCENES = (function () {
   }
   /* the clock tick: the digits only change once a minute */
   function tick() {
-    var h = new Date().getHours();
-    document.body.classList.toggle('late', h >= 22 || h < 6);
+    var place = wxPlace();
+    var dark = nightNow({
+      date: new Date(),
+      weatherDay: WX_LAST && WX_LAST.now && typeof WX_LAST.now.day === 'boolean' ? WX_LAST.now.day : null,
+      lat: place ? place.lat : NaN,
+      lon: place ? place.lon : NaN,
+    });
+    if (dark !== wasDark) {
+      wasDark = dark;
+      document.body.classList.toggle('late', dark);
+      if (window.WALL && WALL.night) WALL.night(dark); /* a theme with a wallpaper darkens it by the same amount */
+    }
     if (on && lastTh && lastTh.scenes && lastTh.scenes.set === 'couch') askAddon(false);
     if (!glassOn()) return;
     var x = hm();
@@ -5285,9 +5352,13 @@ var WALL = (function () {
     c.textContent = want() ? text || '' : '';
     c.style.display = c.textContent ? 'block' : 'none';
   }
+  /* the photo is darkened with the background colour (effects.wallpaperDim), and a little more while the sun is down
+     (effects.nightDim), so the same photo reads as the hour it is. scenes.js works out whether the sun is down and says so here */
+  var dark = false;
   function dim() {
     var th = cfg.theme || {},
       d = th.wallpaper && th.wallpaper.dim != null ? th.wallpaper.dim : 0.4;
+    if (dark) d = Math.min(0.95, d + (th.nightDim != null ? th.nightDim : 0.28));
     layers()[2].style.background = 'rgba(' + (th.nightRgb || '7, 8, 11') + ',' + d + ')';
   }
   /* a live entry is asked of the service (/api/wallpapers/live/<add-on>): it hands over an address on the source's own server and a
@@ -5396,6 +5467,11 @@ var WALL = (function () {
   }
   return {
     sync: sync,
+    /* the sun went down or came up (scenes.js): the photo is darkened again */
+    night: function (down) {
+      dark = !!down;
+      dim();
+    },
     /* Home is on screen again: a new photo when it is time for one (every time with 0 seconds; else once the interval has passed since the
        last change, so opening Home does not change the photo or decode a new one before then), and the timer runs again */
     shown: function () {

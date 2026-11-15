@@ -46,9 +46,13 @@ var WALL = (function () {
     c.textContent = want() ? text || '' : '';
     c.style.display = c.textContent ? 'block' : 'none';
   }
+  /* the photo is darkened with the background colour (effects.wallpaperDim), and a little more while the sun is down
+     (effects.nightDim), so the same photo reads as the hour it is. scenes.js works out whether the sun is down and says so here */
+  var dark = false;
   function dim() {
     var th = cfg.theme || {},
       d = th.wallpaper && th.wallpaper.dim != null ? th.wallpaper.dim : 0.4;
+    if (dark) d = Math.min(0.95, d + (th.nightDim != null ? th.nightDim : 0.28));
     layers()[2].style.background = 'rgba(' + (th.nightRgb || '7, 8, 11') + ',' + d + ')';
   }
   /* a live entry is asked of the service (/api/wallpapers/live/<add-on>): it hands over an address on the source's own server and a
@@ -157,6 +161,11 @@ var WALL = (function () {
   }
   return {
     sync: sync,
+    /* the sun went down or came up (scenes.js): the photo is darkened again */
+    night: function (down) {
+      dark = !!down;
+      dim();
+    },
     /* Home is on screen again: a new photo when it is time for one (every time with 0 seconds; else once the interval has passed since the
        last change, so opening Home does not change the photo or decode a new one before then), and the timer runs again */
     shown: function () {

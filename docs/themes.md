@@ -248,6 +248,7 @@ when the focus moves down into it (Back or Up closes it); a dock at the top leav
 | `effects.speed` | 0 to 2 | `1` | Animation speed multiplier; 0 switches the animations off. |
 | `effects.wallpaper` | a file name | none | A file name in `themes/wallpapers/`: `.jpg`, `.png` or `.webp`, at most 1.5 MB; drawn at 1920 x 1080. |
 | `effects.wallpaperDim` | 0 to 0.9 | `0.4` | How far the wallpaper is darkened with the background colour. |
+| `effects.nightDim` | 0 to 0.6 | `0.28` | How much darker the background is while the sun is down, on top of `effects.wallpaperDim`: the same photograph then reads as the hour it is. `0` keeps it the same all day and all night. Whether the sun is up is taken from the weather of the place of a weather card, else worked out from that place’s coordinates, and without a place from the clock (dark from 10 pm to 6 am). |
 | `effects.scenes` | `off`, `couch`, `custom` | `off` | `couch`: five landscapes shipped with the launcher take turns behind Home (Night, Golden hour, Waterline, Fog, Dawn); with `clock.style` glass the scenery stands in front of the clock. Takes the place of the wallpaper and of Wallpapers. `custom`: the theme brings its own scenes as a `"scenes"` array in `theme.json`. |
 | `effects.sceneSecs` | 10 to 600 | `20` | Seconds each scene stays (`effects.scenes`). |
 | **cards** | | | |
@@ -261,8 +262,10 @@ when the focus moves down into it (Back or Up closes it); a dock at the top leav
 `clock.style` `glass` draws the time as a large glass clock in Antonio: its fill is a blurred, brightened copy of the scene, with a thin
 rim and a sheen. In four scenes the scenery is cut out of the photo and drawn over the clock, so the peaks stand in front of the digits;
 in Waterline the clock sits on the water with a reflection under it. Each scene places the clock and the date above it, so the other
-`clock.*` settings then only set the date's size and whether it shows. Without scenes the glass clock has a white frosted fill. After
-10 pm the scenes dim a little. Everything is drawn once a minute; only opacity animates. The scenes and the clock come from
+`clock.*` settings then only set the date's size and whether it shows. Without scenes the glass clock has a white frosted fill. While the sun
+is down the scenes dim a little, so the same photograph reads as the hour it is. Whether the sun is up is taken from the weather of
+the place of a weather card, else worked out from that place's coordinates, and without a place from the clock (dark from 10 pm to
+6 am), which is what the launcher did before. Everything is drawn once a minute; only opacity animates. The scenes and the clock come from
 [couch-tv](https://github.com/Seagey/couch-tv) (MIT; the scenes were generated for that project and are free to use, the typeface is
 Antonio under the SIL Open Font License, see `THIRD-PARTY.md`).
 

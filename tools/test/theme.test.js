@@ -62,7 +62,7 @@ run(async () => {
       grid: { cols: 99, tileH: -5, radius: 1e9, mode: 'sideways', align: 'middle' },
       type: { scale: '2', font: 'comic' },
       clock: { layout: 'sideways', scale: 50 },
-      effects: { glow: 7, speed: NaN, wallpaper: '../../etc/passwd', wallpaperDim: 5 },
+      effects: { glow: 7, speed: NaN, wallpaper: '../../etc/passwd', wallpaperDim: 5, nightDim: 9 },
       css: 'body{display:none}',
     },
     'evil'
@@ -91,9 +91,21 @@ run(async () => {
       bad.v['effects.speed'] === 1 &&
       bad.v['effects.wallpaper'] === '' &&
       bad.v['effects.wallpaperDim'] === 0.9 &&
+      bad.v['effects.nightDim'] === 0.6 &&
       !('css' in bad.v),
     'effects are clamped, a wallpaper path is refused and unknown keys are dropped'
   );
+  // how dark the background goes while the sun is down: the page reads it as a variable, the wallpaper as a number of its own
+  const dimmed = themeMod.resolve(themeMod.normalize({ effects: { nightDim: 0.5, wallpaper: '' } }, 'dimmed'));
+  ok(
+    dimmed.vars['--night-dim'] === 0.5 && dimmed.nightDim === 0.5,
+    'the night dim reaches the page and the wallpaper: ' + JSON.stringify([dimmed.vars['--night-dim'], dimmed.nightDim])
+  );
+  const asIs = themeMod.resolve(themeMod.normalize({}, 'as-is'));
+  ok(asIs.vars['--night-dim'] === 0.28 && asIs.nightDim === 0.28, 'and a theme that says nothing keeps the dim the scenes had');
+  const never = themeMod.resolve(themeMod.normalize({ effects: { nightDim: 0 } }, 'never'));
+  ok(never.vars['--night-dim'] === 0 && never.nightDim === 0, 'a theme can switch it off with 0');
+
   ok(themeMod.normalize({}, '../x') === null, 'a bad theme id is refused');
   // clock.greeting and dock.tileAlpha: a stacked greeting over the clock and a see-through dock
   const glass = themeMod.resolve(themeMod.normalize({ clock: { layout: 'stack', greeting: true }, dock: { tileAlpha: 0.3 } }, 'glass'));

@@ -232,6 +232,13 @@ const SCHEMA = [
   ],
   ['effects.wallpaperDim', 'num', [0, 0.9], 0.4, 'How far the wallpaper is darkened with the background colour.'],
   [
+    'effects.nightDim',
+    'num',
+    [0, 0.6],
+    0.28,
+    'How much darker the background is while the sun is down, on top of `effects.wallpaperDim`: the same photograph then reads as the hour it is. `0` keeps it the same all day and all night. Whether the sun is up is taken from the weather of the place of a weather card, else worked out from that place\u2019s coordinates, and without a place from the clock (dark from 10 pm to 6 am).',
+  ],
+  [
     'effects.scenes',
     'enum',
     ['off', 'couch', 'custom'],
@@ -483,6 +490,7 @@ function resolve(t, accent) {
   };
   const vars = {
     '--night': v['colors.night'],
+    '--night-dim': v['effects.nightDim'],
     '--night-rgb': night.join(','),
     '--panel': v['colors.panel'],
     '--panel2': mix(v['colors.panel'], v['colors.ink'], 0.06),
@@ -584,6 +592,7 @@ function resolve(t, accent) {
     glowRgb: v['effects.glowColor'] === 'accent' ? rgb(A).join(',') : '',
     nightRgb: night.join(','),
     wallpaper: w ? { id: t.id, file: w, dim: v['effects.wallpaperDim'] } : null,
+    nightDim: v['effects.nightDim'],
   };
   if (v['effects.focusIcon']) out.focusIcon = true;
   // only a theme that changes the page strip carries this key, so the replies for the other themes stay as they were

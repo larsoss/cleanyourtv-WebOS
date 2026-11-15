@@ -7,6 +7,8 @@
    Without scenes the glass clock stands alone with a white frosted fill.
    Custom scenes (effects.scenes "custom"): a theme brings its own images; they are served by the helper at /api/theme/scene/<id>/<file>.
    Per-scene clock and date position are set as CSS variables on each scene element; .s-custom in home.css reads them.
+   The same photo stands in daylight or in the dark: body.late is set while the sun is down (daynight.js), so the scene dims from
+   sunset instead of from 10 pm by the clock.
    Scenes of an add-on (with the couch scenes): an add-on that provides "scenes" (the Seasons add-on, helper/scenes.js) can bring other
    photos for the couch scenes. The launcher asks POST /api/scenes {cc} (the TV's country) when the theme starts the couch scenes and
    every 30 minutes; a list comes back only when such an add-on runs, and then its photos take the place of the five landscapes, drawn
@@ -19,7 +21,8 @@ var SCENES = (function () {
     { id: 'fog', fg: true },
     { id: 'dawn', fg: true },
   ];
-  var addonLib = null /* the scenes of an add-on, as custom scenes, or null */,
+  var wasDark = null /* whether the sun was down the last time the clock ticked */,
+    addonLib = null /* the scenes of an add-on, as custom scenes, or null */,
     addonKey = '',
     addonAt = 0,
     lastTh = null;
@@ -286,8 +289,18 @@ var SCENES = (function () {
   }
   /* the clock tick: the digits only change once a minute */
   function tick() {
-    var h = new Date().getHours();
-    document.body.classList.toggle('late', h >= 22 || h < 6);
+    var place = wxPlace();
+    var dark = nightNow({
+      date: new Date(),
+      weatherDay: WX_LAST && WX_LAST.now && typeof WX_LAST.now.day === 'boolean' ? WX_LAST.now.day : null,
+      lat: place ? place.lat : NaN,
+      lon: place ? place.lon : NaN,
+    });
+    if (dark !== wasDark) {
+      wasDark = dark;
+      document.body.classList.toggle('late', dark);
+      if (window.WALL && WALL.night) WALL.night(dark); /* a theme with a wallpaper darkens it by the same amount */
+    }
     if (on && lastTh && lastTh.scenes && lastTh.scenes.set === 'couch') askAddon(false);
     if (!glassOn()) return;
     var x = hm();

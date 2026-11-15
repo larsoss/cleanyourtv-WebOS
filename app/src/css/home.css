@@ -1284,14 +1284,14 @@ body.scenes-on {
 .scene .fg {
   object-fit: cover;
 }
-/* after 10 pm the scene dims a little (an overlay, no filter) */
+/* while the sun is down the scene dims a little, so the same photo reads as the hour it is (an overlay, no filter: daynight.js) */
 .scene .late {
   background: #000;
   opacity: 0;
   transition: opacity 2s linear;
 }
 .late .scene .late {
-  opacity: 0.28;
+  opacity: var(--night-dim, 0.28);
 }
 .gclock {
   position: absolute;
