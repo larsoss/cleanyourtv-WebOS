@@ -18,6 +18,7 @@ const PAGES = [
   ['helper/addons-bundled/iptv/src', 'helper/addons-bundled/iptv/page/index.html'], // Live TV: the page of the iptv add-on
   ['addons/catalog/tuner/src', 'addons/catalog/tuner/page/index.html'], // the TV guide of the LG tuner add-on: the guide code of Live TV, built again
   ['addons/catalog/phoneremote/src', 'addons/catalog/phoneremote/page/index.html'], // the phone remote's own page on the TV: pairing and the paired phones
+  ['addons/catalog/closeapps/src', 'addons/catalog/closeapps/page/index.html'], // the Close apps add-on: the wait and the apps that stay open
   ['picker/app/index.html', 'picker/app/index.html'],
 ];
 // pages that are the same file in two places: the Stocks and Crypto cards of the markets add-on draw with one code (the launcher serves

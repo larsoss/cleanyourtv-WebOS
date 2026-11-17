@@ -1,0 +1,17 @@
+{
+  "id": "closeapps",
+  "name": "Close apps you leave",
+  "version": "1.0.0",
+  "kind": "service",
+  "description": "An app you walked away from is closed a while later, so the TV gets its memory back.",
+  "about": "webOS keeps an app you left in memory. On a TV with about a gigabyte for everything, two or three of those are enough to make the whole screen slow: the kernel starts swapping to the TV's own storage and never stops. This add-on watches which app is in front, and when you go somewhere else it closes the one you left after the wait you choose (10 seconds to 5 minutes). Come back before the wait is over and nothing happens. On its page you tick the apps that must stay open; the launcher's own apps, LG's Home, the Inputs, Live TV and the Homebrew Channel's apps, such as the Hyperion loaders for ambilight, are never closed.",
+  "entry": { "service": "service.js", "page": "page/index.html" },
+  "permissions": ["luna"],
+  "luna": [
+    { "uri": "luna://com.webos.applicationManager/getForegroundAppInfo" },
+    { "uri": "luna://com.webos.applicationManager/closeByAppId" },
+    { "uri": "luna://com.webos.applicationManager/close" }
+  ],
+  "tile": { "label": "Close apps", "icon": "grid", "placement": "page" },
+  "minService": "1.6.29"
+}

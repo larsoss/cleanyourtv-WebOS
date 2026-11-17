@@ -58,6 +58,10 @@ Homebrew Channel and of CleanYourTV are never listed. The list is read when it o
 
 ![Running apps](screenshots/running.jpg)
 
+The **Close apps you leave** add-on does the same thing by itself: an app you walked away from is closed a while later, so you do not
+have to come here to free the memory. Its page has the wait (10 seconds to 5 minutes) and the apps that must stay open; the launcher's
+own apps, Home, the Inputs, Live TV and the Homebrew Channel's apps, such as the Hyperion loaders for ambilight, are never closed.
+
 ## Customise
 
 ![Customise menu](screenshots/customise.jpg)

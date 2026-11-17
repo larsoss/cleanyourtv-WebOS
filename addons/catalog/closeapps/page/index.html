@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Close apps you leave</title>
+    <style>
+      /* The page of the Close apps add-on: how long the TV waits, and which apps are left open. A page of the launcher's book, so the
+         launcher gives it the focus and Back closes it (the SDK at the end). ES5, Chromium 68: no arrow functions, no template
+         literals, no flex gap. */
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0d1014;
+        color: #eef1f5;
+        font-family: 'LG Smart UI', 'Helvetica Neue', Arial, sans-serif;
+        overflow: hidden;
+      }
+      .wrap {
+        padding: 52px 64px 0;
+        height: 100%;
+      }
+      h1 {
+        font-size: 44px;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      .sub {
+        font-size: 24px;
+        color: #9aa3af;
+        margin: 0 0 10px;
+        max-width: 1400px;
+        line-height: 1.45;
+      }
+      .now {
+        font-size: 22px;
+        color: #7cc4ff;
+        height: 30px;
+        margin-bottom: 18px;
+      }
+      .row {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 2px solid transparent;
+        background: #171b21;
+        color: #eef1f5;
+        border-radius: 16px;
+        padding: 16px 22px;
+        font: inherit;
+        font-size: 26px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        outline: none;
+      }
+      .row:focus {
+        border-color: #7cc4ff;
+        background: #1e242c;
+      }
+      .row .st {
+        float: right;
+        color: #9aa3af;
+        font-size: 24px;
+      }
+      .row.keep .st {
+        color: #6ee7a8;
+      }
+      .list {
+        height: calc(100% - 300px);
+        overflow: auto;
+        padding-right: 8px;
+      }
+      .hint {
+        font-size: 20px;
+        color: #6b737f;
+        padding: 14px 0 20px;
+      }
+      .empty {
+        font-size: 24px;
+        color: #9aa3af;
+        padding: 30px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1 id="h1">Close apps you leave</h1>
+      <p class="sub" id="sub">
+        An app you walked away from is closed after the wait below, so the TV gets its memory back. Press OK on an app to leave it
+        running instead.
+      </p>
+      <div class="now" id="now"></div>
+      <button class="row" id="delay" type="button"></button>
+      <div class="list" id="list"></div>
+      <div class="hint" id="hint"></div>
+    </div>
+    <script>
+      @i18n
+      var S = { on: true, delay: 30, delays: [10, 30, 60, 120, 300], keep: [], front: '', waiting: '', waitingFor: 0 },
+        APPS = [],
+        rows = [],
+        at = 0,
+        tmr = 0;
+
+      function text(id, s) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = s;
+      }
+      function secs(n) {
+        return n < 60 ? t('%d seconds').replace('%d', n) : t('%d minutes').replace('%d', Math.round(n / 60));
+      }
+      function nameOf(id) {
+        for (var i = 0; i < APPS.length; i++) if (APPS[i].id === id) return APPS[i].title || id;
+        return id;
+      }
+      function draw() {
+        text('h1', t('Close apps you leave'));
+        text(
+          'sub',
+          t('An app you walked away from is closed after the wait below, so the TV gets its memory back.') +
+            ' ' +
+            t('Press OK on an app to leave it running instead.')
+        );
+        var d = document.getElementById('delay');
+        d.innerHTML = '';
+        d.appendChild(document.createTextNode(t('Close an app I left after')));
+        var st = document.createElement('span');
+        st.className = 'st';
+        st.textContent = secs(S.delay);
+        d.appendChild(st);
+
+        var now = '';
+        if (S.waiting) now = t('%s closes in a moment').replace('%s', nameOf(S.waiting));
+        else if (S.front) now = t('%s is in front').replace('%s', nameOf(S.front));
+        text('now', now);
+
+        var list = document.getElementById('list');
+        list.innerHTML = '';
+        rows = [document.getElementById('delay')];
+        var shown = 0;
+        for (var i = 0; i < APPS.length; i++) {
+          var a = APPS[i];
+          if (a.safe) continue;
+          shown++;
+          var keep = S.keep.indexOf(a.id) >= 0,
+            b = document.createElement('button');
+          b.className = 'row' + (keep ? ' keep' : '');
+          b.type = 'button';
+          b.setAttribute('data-id', a.id);
+          b.appendChild(document.createTextNode(a.title || a.id));
+          var s2 = document.createElement('span');
+          s2.className = 'st';
+          s2.textContent = keep ? t('left open') : t('closed');
+          b.appendChild(s2);
+          list.appendChild(b);
+          rows.push(b);
+        }
+        if (!shown) {
+          var e = document.createElement('div');
+          e.className = 'empty';
+          e.textContent = t('No apps of your own are installed yet.');
+          list.appendChild(e);
+        }
+        text(
+          'hint',
+          t("The launcher's own apps, Home, the Inputs, Live TV and the Homebrew Channel's apps are never closed.")
+        );
+        focus(Math.min(at, rows.length - 1));
+      }
+      function focus(i) {
+        if (!rows.length) return;
+        at = Math.max(0, Math.min(i, rows.length - 1));
+        rows[at].focus();
+        if (rows[at].scrollIntoView) rows[at].scrollIntoView({ block: 'nearest' });
+      }
+      function api(p, body) {
+        return window.CYTV && CYTV.api
+          ? CYTV.api(p, body)
+          : fetch('/api/addons/closeapps' + p, body ? { method: 'POST', body: JSON.stringify(body) } : {}).then(function (r) {
+              return r.json();
+            });
+      }
+      function save(next) {
+        api('/settings', next).then(function (r) {
+          if (r && r.returnValue) {
+            S.on = r.on;
+            S.delay = r.delay;
+            S.keep = r.keep;
+          }
+          draw();
+        });
+      }
+      function toggle(id) {
+        var keep = S.keep.slice(),
+          i = keep.indexOf(id);
+        if (i >= 0) keep.splice(i, 1);
+        else keep.push(id);
+        save({ keep: keep });
+      }
+      function nextDelay() {
+        var i = S.delays.indexOf(S.delay);
+        save({ delay: S.delays[(i + 1) % S.delays.length] });
+      }
+      function load() {
+        return Promise.all([
+          api('/state'),
+          fetch('/api/apps').then(function (r) {
+            return r.json();
+          }),
+        ]).then(function (r) {
+          var s = r[0] || {},
+            a = (r[1] && r[1].apps) || [];
+          if (s.delays) S.delays = s.delays;
+          if (typeof s.delay === 'number') S.delay = s.delay;
+          if (s.keep) S.keep = s.keep;
+          S.front = s.front || '';
+          S.waiting = s.waiting || '';
+          APPS = a.map(function (x) {
+            return {
+              id: x.id,
+              title: x.title || x.id,
+              safe: /^(com\.cleanyourtv\.|org\.webosbrew\.|com\.webos\.app\.(home|hdmi|livetv|tvhotkey|tvguide|screensaver|notificationcenter))/.test(
+                x.id
+              ),
+            };
+          });
+          draw();
+        });
+      }
+      document.addEventListener('keydown', function (e) {
+        var k = e.keyCode;
+        if (k === 38 || k === 40) {
+          e.preventDefault();
+          focus(at + (k === 40 ? 1 : -1));
+        } else if (k === 13) {
+          e.preventDefault();
+          var el = rows[at];
+          if (!el) return;
+          if (el.id === 'delay') nextDelay();
+          else toggle(el.getAttribute('data-id'));
+        }
+      });
+      load();
+      tmr = setInterval(function () {
+        api('/state').then(function (s) {
+          if (!s) return;
+          S.front = s.front || '';
+          S.waiting = s.waiting || '';
+          var now = '';
+          if (S.waiting) now = t('%s closes in a moment').replace('%s', nameOf(S.waiting));
+          else if (S.front) now = t('%s is in front').replace('%s', nameOf(S.front));
+          text('now', now);
+        });
+      }, 5000);
+    </script>
+    <script src="/addon/sdk.js"></script>
+  </body>
+</html>
