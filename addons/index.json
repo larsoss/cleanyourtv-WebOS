@@ -43,7 +43,7 @@
       "name": "Close apps you leave",
       "version": "1.0.0",
       "description": "An app you walked away from is closed a while later, so the TV gets its memory back.",
-      "about": "webOS keeps an app you left in memory. On a TV with about a gigabyte for everything, two or three of those are enough to make the whole screen slow: the kernel starts swapping to the TV's own storage and never stops. This add-on watches which app is in front, and when you go somewhere else it closes the one you left after the wait you choose (10 seconds to 5 minutes). Come back before the wait is over and nothing happens. On its page you tick the apps that must stay open; the launcher's own apps, LG's Home, the Inputs, Live TV and the Homebrew Channel's apps, such as the Hyperion loaders for ambilight, are never closed.",
+      "about": "webOS keeps an app you left in memory, and on a TV with about a gigabyte for everything two or three of those make the whole screen slow: the kernel starts swapping to the TV's own storage and does not stop. This add-on watches which app is in front and closes the one you left after the wait you choose, 10 seconds to 5 minutes; coming back before the wait is over cancels it. On its page you tick the apps that stay open. The launcher's own apps, Home, the Inputs, Live TV and the Homebrew Channel's apps, such as the Hyperion loaders for ambilight, are never closed.",
       "preview": "",
       "kind": "service",
       "permissions": [
@@ -55,7 +55,7 @@
         "luna://com.webos.applicationManager/close"
       ],
       "files": {
-        "addon.json": "99ce6785387c7ba62f65b60a6555402a3470a8b9869dbee45382c2eabca10a14",
+        "addon.json": "0eb6a1a9a75852c8af0567cd0c3d6157e17c2007fbd2a3f7e34bc55d64c6b6e8",
         "decide.js": "c2e5b30841134b3ed5d9d6e24c00343b59567519191990c8f77ab4493c2d0be6",
         "page/index.html": "f9c9dc1b156502bf9e88a36a5611a96ce948df0e61e9fc4ef07b660fb6567cf1",
         "service.js": "18c58e730fd2364472a58f24c56c53f9719c4de275bee9a1f0b8563888d92a9d",
