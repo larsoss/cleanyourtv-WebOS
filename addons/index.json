@@ -56,9 +56,9 @@
       ],
       "files": {
         "addon.json": "0eb6a1a9a75852c8af0567cd0c3d6157e17c2007fbd2a3f7e34bc55d64c6b6e8",
-        "decide.js": "c2e5b30841134b3ed5d9d6e24c00343b59567519191990c8f77ab4493c2d0be6",
+        "decide.js": "062dca0654c29efed47fb591d24ba99b4b3cb7b09dc43015f40759fe1b15c2c9",
         "page/index.html": "f9c9dc1b156502bf9e88a36a5611a96ce948df0e61e9fc4ef07b660fb6567cf1",
-        "service.js": "18c58e730fd2364472a58f24c56c53f9719c4de275bee9a1f0b8563888d92a9d",
+        "service.js": "49640679c559051513fc9cd476d4e7826e1c3ff736e00e6054ccbfd95e7a796a",
         "src/index.html": "f9c9dc1b156502bf9e88a36a5611a96ce948df0e61e9fc4ef07b660fb6567cf1"
       }
     },

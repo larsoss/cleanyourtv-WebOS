@@ -13,7 +13,7 @@ const TICK = 5000; // how often the app in front is asked
 const LOG_KEEP = 10;
 
 function create(ctx) {
-  const state = { front: '', waiting: null };
+  const state = { front: '', waiting: [] };
   const closed = []; // the last ones, newest first: {id, at}
   let timer = null,
     busy = false,
@@ -80,15 +80,17 @@ function create(ctx) {
         res.end(JSON.stringify(o));
       };
       if (p === '/state') {
-        const s = settings();
+        const s = settings(),
+          soon = state.waiting.slice().sort((a, b) => a.at - b.at)[0]; // the next one to go
         return json({
           on: s.on,
           delay: s.delay,
           delays: decide.DELAYS,
           keep: s.keep,
           front: state.front,
-          waiting: state.waiting ? state.waiting.id : '',
-          waitingFor: state.waiting ? Math.max(0, Math.round((now() - state.waiting.at) / 1000)) : 0,
+          waiting: soon ? soon.id : '',
+          waitingFor: soon ? Math.max(0, Math.round((now() - soon.at) / 1000)) : 0,
+          waitingAll: state.waiting.map(x => x.id),
           closed: closed.slice(),
           error: lastError,
         });
@@ -102,7 +104,7 @@ function create(ctx) {
           keep: Array.isArray(b.keep) ? b.keep : cur.keep,
         });
         ctx.settings.set(next);
-        if (!next.on) state.waiting = null;
+        if (!next.on) state.waiting = [];
         return json({ returnValue: true, on: next.on, delay: next.delay, keep: next.keep });
       }
       return json({ error: 'not found' }, 404);

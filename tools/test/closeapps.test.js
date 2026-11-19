@@ -61,30 +61,53 @@ run(async () => {
 
   // ---- the wait ----
   const S = { on: true, delay: 30, keep: [] };
-  let st = { front: 'netflix', waiting: null };
+  const ids = x => x.waiting.map(w => w.id).join(',');
+  let st = { front: 'netflix', waiting: [] };
   let p = decide.plan(st, 'netflix', S, 0);
-  ok(!p.close && !p.waiting, 'while one app stays in front nothing waits and nothing closes');
+  ok(!p.close && !p.waiting.length, 'while one app stays in front nothing waits and nothing closes');
 
   p = decide.plan(st, 'com.webos.app.home', S, 0);
-  ok(p.waiting && p.waiting.id === 'netflix' && !p.close, 'leaving an app puts it on the clock, it is not closed at once');
+  ok(ids(p) === 'netflix' && !p.close, 'leaving an app puts it on the clock, it is not closed at once');
 
   p = decide.plan(p, 'com.webos.app.home', S, 29000);
-  ok(!p.close && p.waiting, 'a second before the wait is over it is still running');
+  ok(!p.close && ids(p) === 'netflix', 'a second before the wait is over it is still running');
   p = decide.plan(p, 'com.webos.app.home', S, 30000);
-  ok(p.close === 'netflix' && !p.waiting, 'and when the wait is over it is closed once: ' + JSON.stringify(p));
+  ok(p.close === 'netflix' && !p.waiting.length, 'and when the wait is over it is closed once: ' + JSON.stringify(p));
+
+  // what the first test on a TV found: leaving YouTube for Home and walking on to an input threw YouTube's wait away,
+  // and it stayed open for good behind HDMI 2. Every app you leave keeps a clock of its own.
+  p = decide.plan({ front: 'youtube.leanback.v4', waiting: [] }, 'com.webos.app.home', S, 0);
+  p = decide.plan(p, 'com.webos.app.hdmi2', S, 5000);
+  ok(ids(p) === 'youtube.leanback.v4', 'walking on to an input keeps the app you left on the clock: ' + ids(p));
+  p = decide.plan(p, 'com.webos.app.hdmi2', S, 40000);
+  ok(p.close === 'youtube.leanback.v4', 'and it is closed while the TV sits on that input: ' + JSON.stringify(p));
+
+  // two apps left behind: both go, the one you left first ahead of the other
+  p = decide.plan({ front: 'netflix', waiting: [] }, 'youtube.leanback.v4', S, 0);
+  p = decide.plan(p, 'com.webos.app.home', S, 10000);
+  ok(ids(p) === 'netflix,youtube.leanback.v4', 'both apps you left are waiting: ' + ids(p));
+  p = decide.plan(p, 'com.webos.app.home', S, 35000);
+  ok(p.close === 'netflix' && ids(p) === 'youtube.leanback.v4', 'the one you left first goes first');
+  p = decide.plan(p, 'com.webos.app.home', S, 45000);
+  ok(p.close === 'youtube.leanback.v4' && !p.waiting.length, 'and the other follows when its own wait is over');
 
   // coming back cancels it, which is the point of waiting at all
-  st = decide.plan({ front: 'netflix', waiting: null }, 'com.webos.app.home', S, 0);
+  st = decide.plan({ front: 'netflix', waiting: [] }, 'com.webos.app.home', S, 0);
   st = decide.plan(st, 'netflix', S, 5000);
-  ok(!st.waiting && !st.close, 'coming back to the app before the wait is over cancels it');
+  ok(!st.waiting.length && !st.close, 'coming back to the app before the wait is over cancels it');
+
+  // ticking an app to stay open takes it off the clock as well
+  st = decide.plan({ front: 'netflix', waiting: [] }, 'com.webos.app.home', S, 0);
+  st = decide.plan(st, 'com.webos.app.home', { on: true, delay: 30, keep: ['netflix'] }, 40000);
+  ok(!st.close && !st.waiting.length, 'an app ticked to stay open while it waits is not closed after all');
 
   // the TV answers nothing between apps or while it sleeps: that must not look like leaving
-  st = decide.plan({ front: 'netflix', waiting: null }, '', S, 1000);
-  ok(st.front === 'netflix' && !st.waiting && !st.close, 'no answer from the TV decides nothing');
+  st = decide.plan({ front: 'netflix', waiting: [] }, '', S, 1000);
+  ok(st.front === 'netflix' && !st.waiting.length && !st.close, 'no answer from the TV decides nothing');
 
   // switched off on the page, nothing waits
-  st = decide.plan({ front: 'netflix', waiting: null }, 'com.webos.app.home', { on: false }, 0);
-  ok(!st.waiting && !st.close, 'with the add-on switched off on its page nothing is closed');
+  st = decide.plan({ front: 'netflix', waiting: [] }, 'com.webos.app.home', { on: false }, 0);
+  ok(!st.waiting.length && !st.close, 'with the add-on switched off on its page nothing is closed');
 
   // ---- the settings are checked before they are kept ----
   const c = decide.cleanSettings({ on: true, delay: 7, keep: ['netflix', 'netflix', '../x', 42] });
